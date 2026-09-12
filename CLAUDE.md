@@ -2,25 +2,49 @@
 
 ## What this project is
 
-A habit tracker iOS app, built as a prototype to validate the idea quickly
-rather than to ship as a finished product.
+A habit tracker iOS app — a **goal-aligned habit development engine** that
+connects daily actions to long-term objectives. Its differentiator is what it
+refuses to do: no streak coercion, no guilt-driven notifications, no
+engagement-farming. Habits are organized across three **Dimensions of Joy** —
+Health, Career, Fun — to keep growth balanced rather than lopsided.
 
-The concrete product thinking — what a habit is here, what the daily loop
-looks like, what makes this different from every other tracker — hasn't been
-written down yet. It lands in `docs/` and in `.claude/PLAN.md` (via `/plan`)
-before feature work starts. Until then, treat the app idea as unspecified and
-ask rather than assuming.
+**Target user:** people trying to build discipline and consistency — students,
+young professionals, teens, broadly anyone.
+
+Currently a prototype validating the architecture, onboarding framework, and
+ethical-engagement model. Not a shipping product.
+
+Full product specs live in `docs/product/` and are the source of truth:
+
+| Doc | Covers |
+|---|---|
+| `proof-of-concept.md` | Philosophy, MVP screens, onboarding questionnaire, personality mapping, 3-phase roadmap |
+| `information-flow-and-wireframes.md` | Per-screen UI specs and component breakdown |
+| `tech-stack-and-project-architecture.md` | Stack choices, MVCS layer contracts, reference implementations |
+| `blackbox-architecture-and-scalability.md` | Local-first design, indexing, sync, privacy boundaries |
+
+Read the relevant doc before building a feature — don't infer product
+behavior from existing code alone, the code is a thin prototype and the docs
+are ahead of it.
 
 ## Stack
 
-- Language: Swift
-- Framework: SwiftUI
-- Project format: Xcode project (`tao-24.xcodeproj`), single app target
-- Package manager: Swift Package Manager (SPM), via Xcode package dependencies
-- Test runner: XCTest — **no test target exists yet**; one has to be added in
-  Xcode (File > New > Target > Unit Testing Bundle) before `/test` does
-  anything real
-- Lint/format: swift-format (bundled with the toolchain, invoked via `xcrun`)
+- Language: Swift 6 (strict concurrency) — decided; the `.pbxproj` still says
+  `SWIFT_VERSION = 5.0` and is changed as part of Milestone 1.1 Task 1
+- UI: SwiftUI, declarative; Swift Charts + Canvas for the balance wheel and
+  consistency graphs
+- Persistence: SwiftData (`@Model`), SQLite-backed, on device
+- Architecture: Feature-Oriented MVCS (Model–View–Controller–Service)
+- System integration: WidgetKit, UserNotifications
+- Target: iOS 18.0+ — decided; raised from 17.0 so SwiftData's `#Index` macro
+  is available for the two compound indexes. The `.pbxproj` still says
+  `IPHONEOS_DEPLOYMENT_TARGET = 26.5` and is changed as part of Milestone 1.1
+  Task 1
+- Test runner: XCTest — **no test target exists yet**; add one in Xcode
+  (File > New > Target > Unit Testing Bundle) before `/test` means anything
+- Lint/format: swift-format, invoked via `xcrun`
+
+No third-party dependencies. That's deliberate — see Rules.
 
 ## How to run things
 
@@ -55,29 +79,142 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ## Repo layout
 
 ```
-tao-24/              # application code (app target sources, Assets.xcassets)
+tao-24/              # application code
 tao-24.xcodeproj/    # Xcode project
-docs/                # design docs, ADRs, product notes
+docs/product/        # product & architecture specs (source of truth)
+docs/                # ADRs and working notes
 .claude/             # Claude Code config
 ```
 
-There is no SPM `Sources/`/`Tests/` layout — this is a plain Xcode app
-project. A new file only compiles once it's a member of the `tao-24` target,
-so files added outside Xcode need to be added to the target there.
+`tao-24/` is a filesystem-synchronized group (Xcode 16+), so a new `.swift`
+file created there is added to the target and compiled automatically — no
+Xcode step needed. The flip side: **anything** placed in that folder is
+picked up, and non-source files get copied into the built `.app` as bundle
+resources. Keep notes, configs and scratch files out of `tao-24/`.
+
+The app code is still the Xcode starter template (`tao_24App.swift`,
+`ContentView.swift`). The feature-module structure below is the **target**
+layout from the tech-stack doc, not what exists — build into it as features
+land, don't create empty folders ahead of time:
+
+```
+tao-24/
+  Features/
+    Onboarding/      # 5-step questionnaire, starter-plan output
+    StarterHub/      # daily execution checklist, quick-add
+    PlannerHub/      # dimension portals, blueprints, micro-resources
+    ProgressHub/     # balance wheel, consistency trends, milestones
+  Models/            # SwiftData entities
+  Services/          # stateless domain engines
+  DesignSystem/      # shared components, domain theming
+```
+
+Each feature folder holds its own `Views/` and `Controller`.
 
 ## Rules
 
 General engineering conventions (code style, git, testing, secrets) live in
 `~/.claude/CLAUDE.md` and are already in context — don't restate them here.
-This section is only for what's specific to an iOS prototype:
+This section is only what's specific to tao-24:
 
+### Design tokens
+
+Domain accent colors are fixed: **Health → Green, Career → Blue, Fun →
+Orange**. Use the token, never a literal color, and never introduce a fourth
+domain color — the three-way split is the product's core metaphor.
+
+### MVCS layer boundaries
+
+The layer contract is the architecture, so treat a violation as a bug:
+
+- **Model** — SwiftData entities (`Habit`, `HabitExecutionLog`, `LifeGoal`,
+  `UserValueProfile`). Pure data. No business logic, no formatting.
+- **View** — SwiftUI. Renders and forwards gestures. **Zero data mutation.**
+  A View that writes to a `ModelContext` is in the wrong layer.
+- **Controller** — `@Observable` classes holding one screen's presentation
+  state. Owns UI side effects, delegates real work to a Service.
+- **Service** — stateless/singleton engines: completion validation, radar
+  math, questionnaire mapping, notification scheduling. No SwiftUI imports.
+
+Services take their dependencies by injection with a default
+(`init(executionService: HabitExecutionService = .shared)`) so tests can
+substitute a fake without a UI host.
+
+### Product rules that are not negotiable
+
+These come from the PoC's ethical-engagement section. They constrain
+implementation, so check a feature against them before building it:
+
+- **No punitive streaks.** Never reset progress to zero on a missed day.
+  Progress is expressed as trend and consistency rate over 7/30/90 days, not
+  an unbroken chain. If a spec seems to ask for a streak counter, flag the
+  conflict rather than quietly implementing one.
+- **Notifications are conversational check-ins, not commands.** No urgency
+  pressure, no shame framing, no manufactured loss aversion.
+- **Every habit links to a goal.** The goal anchor is core to the product,
+  not decoration.
+- **Balance over volume.** Features should surface distribution across
+  Health/Career/Fun, not maximize total completions.
+
+### Local-first & privacy
+
+- All reads/writes hit the on-device SwiftData store **synchronously**. UI
+  never waits on the network. No feature may degrade when offline.
+- Questionnaire analysis, value scoring, and habit mapping run **on device**.
+  Personality and values data does not leave the phone.
+- **No third-party analytics, telemetry, tracking or ad SDKs.** This is a
+  product guarantee, not a preference. A new dependency of any kind needs an
+  explicit decision — check the project's package dependencies before
+  assuming a library is available.
+- Cloud sync (CloudKit) is background-only and additive; conflicts resolve
+  last-write-wins on ISO-8601 UTC timestamps.
 - Store tokens and credentials in the Keychain, never `UserDefaults`, a
-  plist, or `@AppStorage`.
-- No secrets in `Info.plist` or a checked-in `.xcconfig`.
-- Check the project's package dependencies before assuming a library is
-  available.
-- Keep view bodies thin — push logic into a model type so it stays testable
-  without a UI host.
+  plist, or `@AppStorage`. No secrets in `Info.plist` or a checked-in
+  `.xcconfig`.
+- The local store's data protection level is **deferred to Milestone 3.3**
+  and no entitlement is set before then. Complete File Protection makes the
+  store unreadable while the device is locked, which breaks WidgetKit timeline
+  refresh — so the level is chosen alongside the widget, when its actual needs
+  are known. See `.claude/PLAN.md` > Status.
+
+### Performance
+
+- Two compound indexes carry the hot paths:
+  `HabitExecutionLog[habitID, completedDayStart]` and
+  `Habit[domainRawValue, isArchived]`. Query through those paths — a predicate
+  that forces a full table scan on the daily checklist is a defect.
+  Two notes on the log index, decided in `.claude/PLAN.md` (Phase 01), which
+  is why it differs from the `[habit_id, completedAt]` in the architecture doc:
+  `habitID` is a denormalized `UUID` column because `#Index` cannot traverse a
+  relationship, and `completedDayStart` is a day-normalized companion to
+  `completedAt` because `Calendar` calls are not expressible in `#Predicate`.
+  `completedAt` remains the precise timestamp for display and ordering.
+- Controllers cache the current day's active habits in memory rather than
+  re-reading from disk per view update.
+
+## Open decisions
+
+Resolved (Sep 12, 2026): deployment target is **iOS 18.0+** and language mode
+is **Swift 6 strict concurrency**. The `.pbxproj` still carries Xcode's
+defaults (26.5 / Swift 5); changing it is part of Milestone 1.1 Task 1.
+
+The floor was raised from 17.0 to 18.0 because SwiftData's `#Index` macro is
+iOS 18.0+ and the two compound indexes are an architectural requirement. No
+installed base, so the compatibility cost is nil.
+
+Still open — resolve before the affected work; they change generated code.
+
+1. **Streak API.** The tech-stack doc's reference `HabitExecutionService`
+   includes `calculateCurrentStreak(for:)`, which contradicts the PoC's
+   no-punitive-streaks stance. Decide whether streaks exist as a neutral
+   read-only stat or not at all.
+4. **Missing spec.** The "Project Roadmap: implementation, testing &
+   iteration" link duplicates the architecture doc, so testing strategy and
+   iteration cadence are unspecified.
+5. **Missing diagrams.** Three figures were images and didn't survive the
+   text export: the IA/navigation flow, the modular Xcode structure, and the
+   high-level architecture diagram. The layout above is inferred from the
+   MVCS description.
 
 ## Planning
 
@@ -103,8 +240,14 @@ The planner owns `.claude/PLAN.md` end to end (load → plan → save). Run
 `/load_project` at the start of a session on existing work, and let
 `/save_project` keep state current as you go.
 
+`.claude/PLAN.md` carries the phase/milestone roadmap (mirrored from Notion)
+above the per-milestone plan. The roadmap is hand-maintained — the planner
+reads it to pick up the active milestone but never rewrites it. One milestone
+= one planner run; one Task Breakdown item = one commit.
+
 ## Pointers
 
+- Product specs: `docs/product/` (read before building a feature)
 - Commands: `.claude/commands/` (`/plan`, `/load_project`, `/save_project`,
   `/review`, `/test`, `/fix`, `/commit`)
 - Subagents: `.claude/agents/` (`planner`)

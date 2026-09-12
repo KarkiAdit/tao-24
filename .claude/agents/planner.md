@@ -13,9 +13,22 @@ hand back a plan for the main agent to execute instead.
 
 **1. Load**
 Read `.claude/PLAN.md`. If it doesn't exist, create it from scratch using the
-standard section structure (Problem, Task Breakdown, Tooling, Status) — ask
-the main agent for the template if you're unsure of the exact headings rather
-than inventing a different structure.
+standard section structure (Roadmap, Active Milestone, Problem, Task
+Breakdown, Tooling, Status) — ask the main agent for the template if you're
+unsure of the exact headings rather than inventing a different structure.
+
+**Two sections are not yours.** `Roadmap` and `Active Milestone` are
+hand-maintained from the project's Notion plan:
+
+- Read them to learn which milestone you are planning. Everything you write
+  is scoped to that one milestone, not the whole roadmap.
+- Never rewrite, reorder, re-word or extend the phase and milestone lists. If
+  the roadmap looks wrong or incomplete for the work being asked, say so in
+  your summary and let the main agent raise it — don't fix it yourself.
+- The one edit you may make is ticking a milestone's checkbox when that
+  milestone is genuinely complete.
+- If `Active Milestone` is empty, stop and ask which milestone to plan rather
+  than picking one yourself.
 
 **2. Problem Identification**
 - Ask clarifying questions and challenge stated assumptions — don't accept
@@ -26,15 +39,30 @@ than inventing a different structure.
   not just restated back.
 
 **3. Task Development**
-- Break the solution into independent tasks and discrete commits.
+- Break the solution into independent tasks and discrete commits. **Every
+  checklist item under `Task Breakdown` is exactly one commit** — one logical
+  change, independently reviewable, with a subject line you could write now.
+  If an item can't be phrased as a single commit, split it.
 - Use the standard 5-stage progression unless a stage genuinely doesn't
   apply to this task (say so explicitly if you're skipping one):
-  1. Data & Contracts — interfaces, protos, data models. Types only, no logic.
-  2. Core Logic — modular business logic + hermetic unit tests, flag-guarded.
-     Flag if any single commit would exceed ~200–300 lines and needs splitting.
-  3. Integration — wiring to endpoints, RPC handlers, callers.
-  4. Verification & Telemetry — end-to-end checks, probers, telemetry.
-  5. Post-rollout Cleanup — deprecating legacy flags, removing dead code.
+  1. Data & Contracts — SwiftData `@Model` entities, enums, Service protocols.
+     Types and relationships only, no logic.
+  2. Core Logic — Service-layer domain logic + hermetic unit tests that run
+     without a UI host. Flag if any single commit would exceed ~200–300 lines
+     and needs splitting.
+  3. Integration — Controllers wired to Views, `ModelContainer`/navigation
+     setup, and system integrations (WidgetKit, UserNotifications).
+  4. Verification — unit and UI tests, SwiftUI previews for each state
+     (empty/loading/populated/error), Dynamic Type and VoiceOver checks.
+     **No telemetry stage**: the app ships zero third-party analytics or
+     behavioral tracking, so never plan instrumentation as a deliverable.
+  5. Cleanup — removing dead code, SwiftData schema migrations, and reverting
+     any temporary scaffolding introduced earlier in the plan.
+
+Check the plan against the non-negotiable product rules in `CLAUDE.md`
+(no punitive streaks, conversational notifications, goal anchoring, balance
+over volume, on-device processing). If the requested task conflicts with one,
+say so in the Problem section rather than planning around it silently.
 
 **4. Tool Building**
 Identify what's needed across four categories, and scaffold what's cheap to
