@@ -1,0 +1,19 @@
+# Xcode / Swift
+DerivedData/
+build/
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+
+# Claude Code machine-local state
+.claude/settings.local.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+*.log
