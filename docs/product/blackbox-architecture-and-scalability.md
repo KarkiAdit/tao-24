@@ -9,7 +9,7 @@
 # Black-Box System Architecture & Scalability Design
 
 > **Version** 1.0 · **Status** Draft / Proposal · **Last updated** Sep 11, 2026
-> **Target platform** iOS 18.0+ (Native Swift; raised from 17.0 — see `CLAUDE.md`) ·
+> **Target platform** iOS 17.0+ (Native Swift) ·
 > **System design model** Local-First, Privacy-Centric Architecture
 
 **In this doc:** [Architectural Principles](#executive-overview--architectural-principles) ·
@@ -46,8 +46,9 @@ functions remain unaffected by network latency or connection outages.
 > `completedDayStart` because `Calendar` calls are not expressible in
 > `#Predicate`. Shipped shape:
 > `HabitExecutionLog[habitID, completedDayStart]`. The `Habit` index is
-> unchanged. `#Index` is also iOS 18.0+, which is why the deployment floor was
-> raised from 17.0.
+> unchanged. `#Index` is iOS 18.0+; the project builds against iOS 26.5 (see
+> `CLAUDE.md` > Open decisions), so it is available despite the 17.0+ stated
+> above.
 
 | Entity | Index | Purpose |
 |---|---|---|

@@ -124,13 +124,14 @@ Deferred past the MVP; raised so they are not mistaken for oversights.
   Tokens, and 1.2 — SwiftData Engine & Schema Definition
 - **Planned commits:** 8 (4 per milestone)
 
-Task 0 (agentic setup) is complete. Remaining: M1.1 Task 1 (MVCS folder
-structure + build settings), M1.1 Task 2 (design tokens), M1.2 Task 1
-(`@Model` entities), M1.2 Task 2 (`DatabaseService`).
+Task 0 (agentic setup) and Task 1 (MVCS folder structure) are complete.
+Remaining: M1.1 Task 2 (design tokens), M1.2 Task 1 (`@Model` entities),
+M1.2 Task 2 (`DatabaseService`).
 
-**Decided Sep 12, 2026:** deployment target iOS 17.0+, language mode Swift 6
-strict concurrency. The `.pbxproj` still holds Xcode's defaults (26.5 /
-Swift 5) — changing it belongs to M1.1 Task 1.
+**Decided Sep 12, 2026:** `project.pbxproj` is the source of truth for build
+settings — deployment target **iOS 26.5**, **Swift 5** language mode, kept as
+Xcode created them. M1.1 Task 1 therefore ships no build-setting change; see
+`CLAUDE.md` > Open decisions.
 
 ---
 
@@ -158,8 +159,8 @@ schema decisions that `CLAUDE.md` does not already settle:
   calls aren't expressible in `#Predicate` at all. Gives
   `#Index<HabitExecutionLog>([\.habitID, \.completedDayStart])` and
   `#Index<Habit>([\.domainRawValue, \.isArchived])`.
-  `#Index` is iOS 18.0+, so the deployment floor was raised from 17.0 to 18.0
-  to allow it — resolved, no longer a blocker.
+  `#Index` is iOS 18.0+ and the project's floor is 26.5, so it is available —
+  not a blocker.
 
 ## Task Breakdown
 
@@ -172,7 +173,7 @@ has standalone work in this phase.
 
 ### Stage 1 — Data & Contracts
 
-- [ ] `[M1.1] Set iOS 18.0 target, Swift 6 mode, and MVCS folder layout` — build settings plus moving the two template files; folders appear as files land
+- [x] `[M1.1] Set up the MVCS folder layout` — done in `b907584`; entry point and root view moved to `tao-24/App/`, `@main` struct renamed `Tao24Universe`. No build-setting change: `project.pbxproj` is the source of truth and keeps iOS 26.5 / Swift 5. Follow-ups `f528190` (swift-format config, 4-space) and `a9b6fd5` (capitalize struct) landed with it
 - [ ] `[M1.1] Add tao-24Tests unit test target and verify script` — rooted at `tao-24Tests/`, never under the synced `tao-24/` group; also drops the "no test target exists yet" note from `CLAUDE.md`
 - [ ] `[M1.1] Add DimensionDomain and the core design tokens` — domain colorsets, typography over Dynamic Type, layout metrics; `Color` mapping in DesignSystem so the Model layer stays UI-free
 - [ ] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — `Habit`, `HabitExecutionLog`, `LifeGoal`, `UserValueProfile`; likely 300+ lines, split per entity if it runs long
@@ -214,11 +215,16 @@ phase this short.
 
 ## Status
 
-- Current stage: planned — 8 commits across M1.1 and M1.2, ready to start
-- Done: Task 0 (agentic setup); planning pass for Phase 01
-- In progress: nothing — awaiting review
-- Blocked on: nothing. The iOS floor is resolved at 18.0, which unblocks the
-  `#Index` declarations.
+- Current stage: Stage 1 — executing M1.1 on branch
+  `feat/m1-1-project-scaffold`
+- Done: Task 0 (agentic setup); planning pass for Phase 01; commit 1 of 8
+  (`b907584`, plus `f528190` and `a9b6fd5`)
+- In progress: nothing — commit 2 is next
+- Blocked on: nothing. `project.pbxproj` is the source of truth for build
+  settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
+  is available at that floor.
+- Unverified: nothing has been compiled. `xcodebuild` needs
+  `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
 - Deferred to M3.3: the store's data protection level. `CLAUDE.md` requires
   Complete File Protection, which makes the store unreadable while the device
   is locked and so breaks WidgetKit timeline refresh. It is an entitlement, not
@@ -229,5 +235,5 @@ phase this short.
   with `CLAUDE.md`'s layout; plan follows `CLAUDE.md`. M1.2 Task 2's "default
   templates" are seeded as three per-domain `LifeGoal`s plus the singleton
   profile — blueprints stay a static code catalog, not rows.
-- Next step: commit 1 — `[M1.1] Set iOS 18.0 target, Swift 6 mode, and MVCS
-  folder layout`
+- Next step: commit 2 — `[M1.1] Add tao-24Tests unit test target and verify
+  script`

@@ -10,7 +10,7 @@
 # Native iOS Tech Stack & Project Architecture
 
 > **Version** 1.0 · **Status** Draft · **Last updated** Sep 11, 2026
-> **Target platform** iOS 18.0+ (Native Swift; raised from 17.0 — see `CLAUDE.md`) ·
+> **Target platform** iOS 17.0+ (Native Swift) ·
 > **Architecture style** Feature-Oriented Modular MVCS (Model-View-Controller-Service)
 
 **In this doc:** [Tech Stack](#1-tech-stack-selection) ·
@@ -23,6 +23,14 @@
 ---
 
 ## 1. Tech Stack Selection
+
+> **As-built note.** `project.pbxproj` is the source of truth for build
+> settings, and it keeps Xcode's creation defaults: **iOS 26.5** deployment
+> target and **Swift 5** language mode — not the iOS 17.0+ / Swift 6 stated
+> here. Everything else in this table is as specified. Consequences: `#Index`
+> (iOS 18.0+) is available, and strict-concurrency checking is off, so actor
+> isolation and `Sendable` are applied by hand. See `CLAUDE.md` > Open
+> decisions.
 
 | Component | Technology Choice | Strategic Rationale |
 |---|---|---|

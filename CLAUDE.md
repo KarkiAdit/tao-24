@@ -29,17 +29,14 @@ are ahead of it.
 
 ## Stack
 
-- Language: Swift 6 (strict concurrency) — decided; the `.pbxproj` still says
-  `SWIFT_VERSION = 5.0` and is changed as part of Milestone 1.1 Task 1
+- Language: Swift 5 language mode (`SWIFT_VERSION = 5.0`), with
+  `SWIFT_APPROACHABLE_CONCURRENCY` on
 - UI: SwiftUI, declarative; Swift Charts + Canvas for the balance wheel and
   consistency graphs
 - Persistence: SwiftData (`@Model`), SQLite-backed, on device
 - Architecture: Feature-Oriented MVCS (Model–View–Controller–Service)
 - System integration: WidgetKit, UserNotifications
-- Target: iOS 18.0+ — decided; raised from 17.0 so SwiftData's `#Index` macro
-  is available for the two compound indexes. The `.pbxproj` still says
-  `IPHONEOS_DEPLOYMENT_TARGET = 26.5` and is changed as part of Milestone 1.1
-  Task 1
+- Target: iOS 26.5 (`IPHONEOS_DEPLOYMENT_TARGET = 26.5`)
 - Test runner: XCTest — **no test target exists yet**; add one in Xcode
   (File > New > Target > Unit Testing Bundle) before `/test` means anything
 - Lint/format: swift-format, invoked via `xcrun`
@@ -196,13 +193,20 @@ implementation, so check a feature against them before building it:
 
 ## Open decisions
 
-Resolved (Sep 12, 2026): deployment target is **iOS 18.0+** and language mode
-is **Swift 6 strict concurrency**. The `.pbxproj` still carries Xcode's
-defaults (26.5 / Swift 5); changing it is part of Milestone 1.1 Task 1.
+**Resolved (Sep 12, 2026): `project.pbxproj` is the source of truth for build
+settings.** Deployment target **iOS 26.5**, **Swift 5** language mode — Xcode's
+defaults at project creation, kept as-is. No build-setting change is planned;
+where the spec docs say iOS 17.0+, the project wins and the docs carry a note.
 
-The floor was raised from 17.0 to 18.0 because SwiftData's `#Index` macro is
-iOS 18.0+ and the two compound indexes are an architectural requirement. No
-installed base, so the compatibility cost is nil.
+Two consequences worth knowing:
+
+- SwiftData's `#Index` macro is iOS 18.0+, so at a 26.5 floor it is available.
+  The two compound indexes can be declared outright — this was previously a
+  blocker and no longer is.
+- Swift 6 strict concurrency is **not** enabled. Data-race safety is not
+  compiler-enforced, so `@MainActor` isolation on Controllers and `Sendable`
+  on anything crossing an actor boundary have to be applied by hand rather
+  than caught at build time. Revisit if that starts to bite.
 
 Still open — resolve before the affected work; they change generated code.
 
