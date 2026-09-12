@@ -92,13 +92,15 @@ Xcode step needed. The flip side: **anything** placed in that folder is
 picked up, and non-source files get copied into the built `.app` as bundle
 resources. Keep notes, configs and scratch files out of `tao-24/`.
 
-The app code is still the Xcode starter template (`tao_24App.swift`,
-`ContentView.swift`). The feature-module structure below is the **target**
-layout from the tech-stack doc, not what exists — build into it as features
-land, don't create empty folders ahead of time:
+`App/` exists and holds the entry point. The rest of the structure below is
+the **target** layout from the tech-stack doc — build into it as features
+land, don't create the folders ahead of time. Git can't track an empty
+directory anyway, and a `.gitkeep` placed under `tao-24/` risks being copied
+into the built `.app` as a bundle resource by the synchronized group.
 
 ```
 tao-24/
+  App/               # @main entry point and root view          [exists]
   Features/
     Onboarding/      # 5-step questionnaire, starter-plan output
     StarterHub/      # daily execution checklist, quick-add
