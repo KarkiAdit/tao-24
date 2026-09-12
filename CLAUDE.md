@@ -118,9 +118,56 @@ This section is only what's specific to tao-24:
 
 ### Design tokens
 
-Domain accent colors are fixed: **Health → Green, Career → Blue, Fun →
-Orange**. Use the token, never a literal color, and never introduce a fourth
-domain color — the three-way split is the product's core metaphor.
+Deep-dark and **dark-only**: a black ground with grey
+surfaces stepping up by luminance (`#000000` → `#121212` → `#181818` →
+`#282828`), high-contrast type, and saturated colour spent only where it
+carries meaning. There are no light values, so the app locks
+`preferredColorScheme(.dark)` — adding light mode means adding a second value
+to every colour token, not flipping a switch.
+
+`docs/design-tokens.json` is the specification; `tao-24/DesignSystem/` mirrors
+it (`ColorTokens`, `TypographyTokens`, `LayoutTokens`). Change a value in both
+or they drift — the JSON records the measured contrast ratio justifying each.
+
+Domain accents are fixed: **Health → Green `#30D158`, Career → Blue `#0A84FF`,
+Fun → Orange `#FF5500`**. Never introduce a fourth domain colour; the
+three-way split is the product's core metaphor. Colour is never the *only*
+signal either — these are hard to distinguish with deuteranopia, so pair every
+accent with `domain.symbolName` and a text label.
+
+Components live in `tao-24/DesignSystem/Components/`: `TaoCard`,
+`DomainPill`, `CompletionRing`, and the `GlowEffect` modifiers
+(`.softGlow`, `.strongGlow`).
+
+**Naming:** describe what a component *is*, never what it was modelled on — no
+third-party product names in type names, filenames or comments. Swift has
+module namespacing, so skip prefixes by default; the one exception is a name
+too generic to read at a call site or liable to collide with a future SwiftUI
+type, which is why `TaoCard` carries the prefix and the rest do not.
+
+Rules:
+
+- Never write a literal `Color` or a fixed font size in a view — add a token.
+- Reach for `DimensionDomain.accent`, not `ColorTokens.healthAccent`, so the
+  domain-to-colour mapping stays in one place.
+- Text on a filled accent uses `domain.onAccent`, which is **black** for all
+  three. Every accent is bright enough on dark that white text fails AA.
+- Type styles build on system text styles so everything scales with Dynamic
+  Type. Prefer the `.displayStyle()` / `.bodyStyle()` view modifiers, which
+  carry the matching text colour so the pairing cannot drift.
+- One spring for the whole system: `LayoutTokens.Motion.spring`. Every
+  animated component checks `accessibilityReduceMotion` and every glow checks
+  `accessibilityReduceTransparency`.
+- **Glow is decoration, never state.** It is invisible to anyone who cannot
+  separate the hue from black, so an element's state must also be carried by
+  fill, symbol, or label.
+- **There is no error colour for habit completion.** An incomplete ring is
+  neutral grey, never red, and un-completing animates exactly like completing.
+  Missing a day is not a failure state.
+- Every text token clears 4.5:1 on `#121212` and every accent clears 4.5:1 on
+  all four dark surfaces. Re-measure when adding one rather than eyeballing
+  it; the reference grey `#6A6A6A` fails at 3.46:1, which is why ours is
+  `#8A8A8A`.
 
 ### MVCS layer boundaries
 

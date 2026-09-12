@@ -1,0 +1,113 @@
+{
+  "$schema": "https://tao-24.local/design-tokens.schema.json",
+  "name": "Dimensions of Joy",
+  "version": "1.0.0",
+  "appearance": "dark-only",
+  "notes": [
+    "Source of truth for tao-24/DesignSystem/*Tokens.swift. Change a value here, mirror it there.",
+    "Dark-only by design: the palette is anchored to deep black and has no light counterpart, so the app locks preferredColorScheme(.dark). Adding light mode means adding a 'light' value to every color token.",
+    "Every contrast ratio below is measured, not estimated. Re-measure when changing a value."
+  ],
+
+  "color": {
+    "background": {
+      "base":    { "value": "#000000", "usage": "App ground, behind scroll content and under sheets." },
+      "surface": { "value": "#121212", "usage": "Default screen surface. The reference background for all contrast math." },
+      "card":    { "value": "#181818", "usage": "Cards and rows lifted off the surface." },
+      "overlay": { "value": "#282828", "usage": "Pressed and hovered states, unfilled progress tracks, sheet grabbers." }
+    },
+
+    "domain": {
+      "health": {
+        "accent":   { "value": "#30D158", "contrastOnSurface": 9.27, "usage": "Health rings, pills, active states." },
+        "onAccent": { "value": "#000000", "contrastOnAccent": 10.39, "usage": "Label on a filled Health accent." },
+        "alternate": { "value": "#00E676", "note": "Higher-vibrancy option from the brief; 11.22 on surface, brighter than the other two domains." }
+      },
+      "career": {
+        "accent":   { "value": "#0A84FF", "contrastOnSurface": 5.14, "usage": "Career rings, pills, active states." },
+        "onAccent": { "value": "#000000", "contrastOnAccent": 5.76, "usage": "Label on a filled Career accent." },
+        "alternate": { "value": "#00D2FF", "note": "Electric cyan option from the brief; 10.40 on surface, considerably louder." }
+      },
+      "fun": {
+        "accent":   { "value": "#FF5500", "contrastOnSurface": 5.84, "usage": "Fun rings, pills, active states." },
+        "onAccent": { "value": "#000000", "contrastOnAccent": 6.55, "usage": "Label on a filled Fun accent." },
+        "alternate": { "value": "#FF2D55", "note": "Pink option from the brief. Rejected as default: reads as an error colour on dark, and breaks the Fun-is-orange rule in CLAUDE.md." }
+      }
+    },
+
+    "text": {
+      "primary":   { "value": "#FFFFFF", "contrastOnSurface": 18.73, "usage": "Headings, habit names, metrics." },
+      "secondary": { "value": "#B3B3B3", "contrastOnSurface": 8.93,  "usage": "Supporting copy, metadata, inactive tabs." },
+      "muted":     { "value": "#8A8A8A", "contrastOnSurface": 5.43,  "usage": "Timestamps, the quietest labels.",
+                     "note": "The reference grey #6A6A6A measures 3.46 on #121212 and fails AA. Lightened deliberately." }
+    },
+
+    "border": {
+      "subtle": { "value": "#2A2A2A", "usage": "Hairline dividers. Rare — luminance separates surfaces first." },
+      "strong": { "value": "#3E3E3E", "usage": "Focus rings and outlined controls." }
+    },
+
+    "status": {
+      "positive": { "value": "#30D158", "usage": "Completion confirmed. Shares the Health hue deliberately — one positive language." },
+      "notice":   { "value": "#FFD60A", "usage": "Gentle attention. Never for a missed habit.",
+                    "constraint": "There is no negative/error status colour for habit completion. Missing a day is not an error state; see the no-punitive-streaks rule." }
+    }
+  },
+
+  "typography": {
+    "fontFamily": {
+      "primary": "SF Pro Display / SF Pro Text (system)",
+      "note": "The reference face is proprietary. The system face reproduces the weight relationship, not the typeface."
+    },
+    "scale": {
+      "display":  { "textStyle": "largeTitle", "weight": "bold",     "size": 34, "lineHeight": 41, "tracking": -0.4, "usage": "Screen titles." },
+      "header1":  { "textStyle": "title",      "weight": "bold",     "size": 28, "lineHeight": 34, "tracking": -0.3, "usage": "Hero card titles." },
+      "header2":  { "textStyle": "title2",     "weight": "bold",     "size": 22, "lineHeight": 28, "tracking": -0.2, "usage": "Card titles." },
+      "header3":  { "textStyle": "headline",   "weight": "semibold", "size": 17, "lineHeight": 22, "tracking": 0,    "usage": "Section headers." },
+      "body":     { "textStyle": "body",       "weight": "regular",  "size": 17, "lineHeight": 22, "tracking": 0,    "usage": "Reading copy." },
+      "bodyEmphasis": { "textStyle": "body",   "weight": "semibold", "size": 17, "lineHeight": 22, "tracking": 0,    "usage": "Habit names in a row." },
+      "caption":  { "textStyle": "caption",    "weight": "regular",  "size": 12, "lineHeight": 16, "tracking": 0,    "usage": "Metadata, timestamps." },
+      "tag":      { "textStyle": "caption2",   "weight": "bold",     "size": 11, "lineHeight": 13, "tracking": 0.6,  "usage": "Domain pills. Uppercase." }
+    },
+    "note": "Sizes are the @1x default for reference only. Every style is built on its textStyle so it scales with Dynamic Type; never hardcode a point size."
+  },
+
+  "spacing": {
+    "grid": 4,
+    "xs":  { "value": 4,  "usage": "Icon-to-label." },
+    "sm":  { "value": 8,  "usage": "Inside a pill." },
+    "md":  { "value": 12, "usage": "Between rows." },
+    "lg":  { "value": 16, "usage": "Screen margins, card padding." },
+    "xl":  { "value": 24, "usage": "Between sections." },
+    "xxl": { "value": 32, "usage": "Above a screen title." }
+  },
+
+  "radius": {
+    "pill":  { "value": -1, "usage": "Fully rounded. Domain pills, filter chips.", "note": "-1 encodes .infinity in Swift." },
+    "card":  { "value": 8,  "usage": "Standard cards and rows." },
+    "hero":  { "value": 16, "usage": "Album-art style hero cards." },
+    "sheet": { "value": 16, "usage": "Modal sheet corners." }
+  },
+
+  "elevation": {
+    "note": "Dark surfaces separate by luminance, not drop shadows. The only 'elevation' is an accent glow on active elements.",
+    "glow": {
+      "soft":   { "radius": 12, "opacity": 0.35, "usage": "Active domain pill." },
+      "strong": { "radius": 24, "opacity": 0.45, "usage": "Hero card ambient aura." }
+    }
+  },
+
+  "motion": {
+    "springResponse": 0.34,
+    "springDamping": 0.7,
+    "pressedScale": 0.97,
+    "usage": "One spring for the whole system. Tactile, not bouncy.",
+    "reducedMotion": "Honour accessibilityReduceMotion: cross-fade instead of scale/spring."
+  },
+
+  "accessibility": {
+    "minimumTextContrast": 4.5,
+    "minimumUIContrast": 3.0,
+    "rule": "Colour is never the only signal. Every domain accent is paired with a distinct SF Symbol and a text label, because green/blue/orange are hard to separate with deuteranopia."
+  }
+}

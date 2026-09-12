@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 12, 2026 — Phase 01 (M1.1 + M1.2) planned; 8 commits staged._
+_Last updated: Sep 12, 2026 — M1.1 tasks done; commit 2 remains before M1.2._
 
 ## Roadmap
 
@@ -30,12 +30,15 @@ run; the planner turns each task into one or more discrete commits under
 
 - [ ] **Milestone 1.1 — Project Scaffold & Design System Tokens**
   - [x] Task 0: Define the agentic setup for the project.
-  - [ ] Task 1: Set up Xcode project structure following the feature-oriented
+  - [x] Task 1: Set up Xcode project structure following the feature-oriented
         MVCS pattern (Core, Features, StarterHub, Planner, Progress,
         Onboarding).
-  - [ ] Task 2: Define core design tokens: domain accent colors (Health →
+  - [x] Task 2: Define core design tokens: domain accent colors (Health →
         Green, Career → Blue, Fun → Orange), system typography styles, and
         reusable custom card containers.
+        <!-- Fully done, including the "reusable custom card containers"
+             clause: TaoCard, DomainPill, CompletionRing and
+             GlowEffect all shipped with the tokens. -->
 - [ ] **Milestone 1.2 — SwiftData Engine & Schema Definition**
   - [ ] Task 1: Implement `@Model` definitions for `Habit`,
         `HabitExecutionLog`, `LifeGoal`, and `UserValueProfile`.
@@ -124,9 +127,10 @@ Deferred past the MVP; raised so they are not mistaken for oversights.
   Tokens, and 1.2 — SwiftData Engine & Schema Definition
 - **Planned commits:** 8 (4 per milestone)
 
-Task 0 (agentic setup) and Task 1 (MVCS folder structure) are complete.
-Remaining: M1.1 Task 2 (design tokens), M1.2 Task 1 (`@Model` entities),
-M1.2 Task 2 (`DatabaseService`).
+All three M1.1 tasks are complete (agentic setup, MVCS folder structure,
+design tokens). Milestone 1.1 stays unticked until the test target and verify
+script land — Phase 01 scope added those, they are not Notion tasks.
+Remaining: M1.2 Task 1 (`@Model` entities), M1.2 Task 2 (`DatabaseService`).
 
 **Decided Sep 12, 2026:** `project.pbxproj` is the source of truth for build
 settings — deployment target **iOS 26.5**, **Swift 5** language mode, kept as
@@ -175,7 +179,7 @@ has standalone work in this phase.
 
 - [x] `[M1.1] Set up the MVCS folder layout` — done in `b907584`; entry point and root view moved to `tao-24/App/`, `@main` struct renamed `Tao24Universe`. No build-setting change: `project.pbxproj` is the source of truth and keeps iOS 26.5 / Swift 5. Follow-ups `f528190` (swift-format config, 4-space) and `a9b6fd5` (capitalize struct) landed with it
 - [ ] `[M1.1] Add tao-24Tests unit test target and verify script` — rooted at `tao-24Tests/`, never under the synced `tao-24/` group; also drops the "no test target exists yet" note from `CLAUDE.md`
-- [ ] `[M1.1] Add DimensionDomain and the core design tokens` — domain colorsets, typography over Dynamic Type, layout metrics; `Color` mapping in DesignSystem so the Model layer stays UI-free
+- [x] `[M1.1] Add DimensionDomain and the core design tokens` — deep-dark system, **dark-only** (app locks `.preferredColorScheme(.dark)`). `docs/design-tokens.json` is the spec; `ColorTokens`/`TypographyTokens`/`LayoutTokens` mirror it, cross-checked in CI-able form. Absorbs the Stage 3 component commit: `TaoCard`, `DomainPill`, `CompletionRing`, `GlowEffect`
 - [ ] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — `Habit`, `HabitExecutionLog`, `LifeGoal`, `UserValueProfile`; likely 300+ lines, split per entity if it runs long
 - [ ] `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` — both `#Index` declarations plus the canonical descriptors, so no caller hand-rolls a scanning predicate
 
@@ -185,7 +189,7 @@ has standalone work in this phase.
 
 ### Stage 3 — Integration
 
-- [ ] `[M1.1] Add CardContainer and DomainTagPill with previews` — the two shared components; the pill pairs color with icon and label so color is never the sole domain signal
+- [x] ~~`[M1.1] Add CardContainer and DomainTagPill with previews`~~ — superseded: shipped as `TaoCard` and `DomainPill` in the design-tokens commit, alongside `CompletionRing` and `GlowEffect`. The pill still pairs colour with icon and label so colour is never the sole domain signal
 - [ ] `[M1.2] Attach the ModelContainer and replace the template ContentView` — wires the app scene and drops the starter scaffolding
 
 ### Stage 4 — Verification
@@ -217,9 +221,12 @@ phase this short.
 
 - Current stage: Stage 1 — executing M1.1 on branch
   `feat/m1-1-project-scaffold`
-- Done: Task 0 (agentic setup); planning pass for Phase 01; commit 1 of 8
-  (`b907584`, plus `f528190` and `a9b6fd5`)
-- In progress: nothing — commit 2 is next
+- Done: Task 0 (agentic setup); planning pass for Phase 01; commit 1
+  (`b907584`, plus `f528190`, `a9b6fd5`, `90bab25`) and commit 3 (design
+  tokens). M1.1 Task 2 is complete.
+- In progress: nothing — commit 2 (test target + verify script) is the
+  remaining M1.1 work, taken out of order because the design tokens were
+  asked for first
 - Blocked on: nothing. `project.pbxproj` is the source of truth for build
   settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
   is available at that floor.
@@ -236,4 +243,4 @@ phase this short.
   templates" are seeded as three per-domain `LifeGoal`s plus the singleton
   profile — blueprints stay a static code catalog, not rows.
 - Next step: commit 2 — `[M1.1] Add tao-24Tests unit test target and verify
-  script`
+  script`, which completes M1.1 and is the point to fast-forward `main`
