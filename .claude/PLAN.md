@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 12, 2026 — M1.1 tasks done; commit 2 remains before M1.2._
+_Last updated: Sep 27, 2026 — Milestone 1.1 complete and pushed; M1.2 next._
 
 ## Roadmap
 
@@ -28,7 +28,7 @@ run; the planner turns each task into one or more discrete commits under
 
 ### Phase 01 — Core Foundation & Data Persistence
 
-- [ ] **Milestone 1.1 — Project Scaffold & Design System Tokens**
+- [x] **Milestone 1.1 — Project Scaffold & Design System Tokens**  _(complete, `3d992ce`)_
   - [x] Task 0: Define the agentic setup for the project.
   - [x] Task 1: Set up Xcode project structure following the feature-oriented
         MVCS pattern (Core, Features, StarterHub, Planner, Progress,
@@ -117,19 +117,21 @@ Deferred past the MVP; raised so they are not mistaken for oversights.
   (vacation/sick mode), and intentional context-aware reminders are unplanned.
   These are the product's stated differentiator.
 - **Customizable Domain Weights** (PoC Phase 2) has no milestone.
-- ~~No milestone covers adding a **unit test target**~~ — resolved: Phase 01
-  adds it, see Task Breakdown.
+- **No milestone covers adding a unit test target.** Phase 01 was scoped to
+  add one, then deferred on Sep 27, 2026. Nothing in the project has ever been
+  compiled or tested. M1.2's `DatabaseService` is the Service-layer logic
+  `CLAUDE.md` says must be testable without a UI host, so this is the natural
+  point to revisit.
 
 ## Active Milestone
 
 - **Phase:** 01 — Core Foundation & Data Persistence
-- **Milestones in scope this run:** 1.1 — Project Scaffold & Design System
-  Tokens, and 1.2 — SwiftData Engine & Schema Definition
-- **Planned commits:** 8 (4 per milestone)
+- **Milestone:** 1.2 — SwiftData Engine & Schema Definition
+- **Planned commits:** 3 remaining of 8; Milestone 1.1 is complete
 
-All three M1.1 tasks are complete (agentic setup, MVCS folder structure,
-design tokens). Milestone 1.1 stays unticked until the test target and verify
-script land — Phase 01 scope added those, they are not Notion tasks.
+Milestone 1.1 is complete and pushed: agentic setup, MVCS folder structure,
+and the design system. The test target that Phase 01 scoping had added to
+M1.1 was deferred rather than built, so the milestone closed without it.
 Remaining: M1.2 Task 1 (`@Model` entities), M1.2 Task 2 (`DatabaseService`).
 
 **Decided Sep 12, 2026:** `project.pbxproj` is the source of truth for build
@@ -178,7 +180,7 @@ has standalone work in this phase.
 ### Stage 1 — Data & Contracts
 
 - [x] `[M1.1] Set up the MVCS folder layout` — done in `b907584`; entry point and root view moved to `tao-24/App/`, `@main` struct renamed `Tao24Universe`. No build-setting change: `project.pbxproj` is the source of truth and keeps iOS 26.5 / Swift 5. Follow-ups `f528190` (swift-format config, 4-space) and `a9b6fd5` (capitalize struct) landed with it
-- [ ] `[M1.1] Add tao-24Tests unit test target and verify script` — rooted at `tao-24Tests/`, never under the synced `tao-24/` group; also drops the "no test target exists yet" note from `CLAUDE.md`
+- [ ] ~~`[M1.1] Add tao-24Tests unit test target and verify script`~~ — **deferred, not done.** Dropped from M1.1 by decision on Sep 27, 2026; the milestone was marked complete without it. Still rooted at `tao-24Tests/` when it lands, never under the synced `tao-24/` group. See Future tasks
 - [x] `[M1.1] Add DimensionDomain and the core design tokens` — deep-dark system, **dark-only** (app locks `.preferredColorScheme(.dark)`). `docs/design-tokens.json` is the spec; `ColorTokens`/`TypographyTokens`/`LayoutTokens` mirror it, cross-checked in CI-able form. Absorbs the Stage 3 component commit: `TaoCard`, `DomainPill`, `CompletionRing`, `GlowEffect`
 - [ ] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — `Habit`, `HabitExecutionLog`, `LifeGoal`, `UserValueProfile`; likely 300+ lines, split per entity if it runs long
 - [ ] `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` — both `#Index` declarations plus the canonical descriptors, so no caller hand-rolls a scanning predicate
@@ -219,19 +221,19 @@ phase this short.
 
 ## Status
 
-- Current stage: Stage 1 — executing M1.1 on branch
-  `feat/m1-1-project-scaffold`
-- Done: Task 0 (agentic setup); planning pass for Phase 01; commit 1
-  (`b907584`, plus `f528190`, `a9b6fd5`, `90bab25`) and commit 3 (design
-  tokens). M1.1 Task 2 is complete.
-- In progress: nothing — commit 2 (test target + verify script) is the
-  remaining M1.1 work, taken out of order because the design tokens were
-  asked for first
+- Current stage: Stage 1 — M1.1 complete and merged to `main` (`3d992ce`,
+  pushed); M1.2 not started
+- Done: **Milestone 1.1**, all three Notion tasks — agentic setup, MVCS
+  folder layout (`b907584`, `f528190`, `a9b6fd5`, `90bab25`), design system
+  (`3d992ce`). Merged to `main` and pushed.
+- In progress: nothing — M1.2 is next
 - Blocked on: nothing. `project.pbxproj` is the source of truth for build
   settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
   is available at that floor.
-- Unverified: nothing has been compiled. `xcodebuild` needs
-  `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
+- Unverified: **nothing in the project has ever been compiled.** `xcodebuild`
+  needs `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
+  With the test target deferred too, `main` currently has no automated check
+  beyond `swift-format lint --strict`.
 - Deferred to M3.3: the store's data protection level. `CLAUDE.md` requires
   Complete File Protection, which makes the store unreadable while the device
   is locked and so breaks WidgetKit timeline refresh. It is an entitlement, not
@@ -242,5 +244,5 @@ phase this short.
   with `CLAUDE.md`'s layout; plan follows `CLAUDE.md`. M1.2 Task 2's "default
   templates" are seeded as three per-domain `LifeGoal`s plus the singleton
   profile — blueprints stay a static code catalog, not rows.
-- Next step: commit 2 — `[M1.1] Add tao-24Tests unit test target and verify
-  script`, which completes M1.1 and is the point to fast-forward `main`
+- Next step: M1.2 — `[M1.2] Add the four @Model entities with typed frequency
+  storage`
