@@ -86,12 +86,20 @@ final class ProgressService {
         }
     }
 
+    /// The ratio between the busiest and quietest dimension at which a period
+    /// still reads as balanced.
+    ///
+    /// 1.5 is forgiving without lying. An absolute tolerance was tried first
+    /// and was wrong: ±15 points around an even third accepts 40/40/20, which
+    /// the wheel visibly draws as a lean. Copy that contradicts the chart
+    /// beside it costs more trust than a stricter threshold ever would.
+    private static let balanceRatioTolerance = 1.5
+
     /// Reads the distribution in words.
     ///
-    /// "Balanced" is generous on purpose — within 15 points of an even third
-    /// counts. A wheel that only says "balanced" at exact thirds would call
-    /// almost every real week unbalanced, which turns an observation into
-    /// nagging.
+    /// Compares busiest against quietest rather than each share against a
+    /// target, because that is what the eye does when it looks at the
+    /// triangle.
     func insight(for effort: [DomainEffort]) -> BalanceInsight {
         let total = effort.reduce(0) { $0 + $1.completions }
         guard total > 0 else { return .noData }
@@ -100,10 +108,12 @@ final class ProgressService {
             return .untouched(untouched.domain)
         }
 
-        let evenShare = 1.0 / Double(DimensionDomain.allCases.count)
-        let tolerance = 0.15
-        let isBalanced = effort.allSatisfy { abs($0.share - evenShare) <= tolerance }
-        if isBalanced { return .balanced }
+        let shares = effort.map(\.share)
+        guard let highest = shares.max(), let lowest = shares.min(), lowest > 0 else {
+            return .balanced
+        }
+
+        if highest / lowest <= Self.balanceRatioTolerance { return .balanced }
 
         let leader = effort.max { $0.share < $1.share }
         return leader.map { .leaning($0.domain) } ?? .balanced

@@ -209,6 +209,20 @@ final class ProgressServiceTests: XCTestCase {
         XCTAssertEqual(service.insight(for: try domainEffort(.week)), .balanced)
     }
 
+    func testADimensionAtHalfTheOthersIsNotCalledBalanced() throws {
+        // Regression: 40/40/20 was reported as balanced while the wheel drew a
+        // visible lean, so the badge contradicted the chart beside it.
+        try logAcrossDomains(health: 6, career: 6, fun: 3)
+
+        let insight = service.insight(for: try domainEffort(.week))
+
+        XCTAssertNotEqual(insight, .balanced)
+        if case .leaning = insight {
+        } else {
+            XCTFail("expected a lean, got \(insight)")
+        }
+    }
+
     // MARK: Consistency rate
 
     func testConsistencyCountsOnlyDueDays() throws {

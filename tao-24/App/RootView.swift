@@ -11,10 +11,9 @@ import SwiftUI
 /// Carries the two shipped hubs and the app-level concern neither should own —
 /// telling the user when their data is not being persisted.
 ///
-/// The tab bar is deliberately minimal and partly anticipates M3.1, which owns
-/// navigation properly: deep links from onboarding, and the Progress tab once
-/// M2.3 builds it. Adding it now is what makes the Planner reachable at all —
-/// a screen no one can open cannot be reviewed.
+/// The tab bar partly anticipates M3.1, which still owns navigation properly —
+/// the onboarding deep link in particular. It lives here because a screen no
+/// one can open cannot be reviewed.
 struct RootView: View {
 
     /// True when the store could not be opened on disk. Surfaced because data
@@ -29,6 +28,9 @@ struct RootView: View {
 
                 PlannerHubView()
                     .tabItem { Label("Plan", systemImage: "square.grid.2x2") }
+
+                ProgressHubView()
+                    .tabItem { Label("Progress", systemImage: "chart.bar") }
             }
             .tint(ColorTokens.textPrimary)
 
