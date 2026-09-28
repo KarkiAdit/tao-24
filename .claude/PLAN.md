@@ -117,11 +117,8 @@ Deferred past the MVP; raised so they are not mistaken for oversights.
   (vacation/sick mode), and intentional context-aware reminders are unplanned.
   These are the product's stated differentiator.
 - **Customizable Domain Weights** (PoC Phase 2) has no milestone.
-- **No milestone covers adding a unit test target.** Phase 01 was scoped to
-  add one, then deferred on Sep 27, 2026. Nothing in the project has ever been
-  compiled or tested. M1.2's `DatabaseService` is the Service-layer logic
-  `CLAUDE.md` says must be testable without a UI host, so this is the natural
-  point to revisit.
+- ~~No milestone covers adding a unit test target~~ — resolved: landed in
+  `2989277`. A `verify.sh` wrapping build + test + lint is still unwritten.
 
 ## Active Milestone
 
@@ -180,7 +177,7 @@ has standalone work in this phase.
 ### Stage 1 — Data & Contracts
 
 - [x] `[M1.1] Set up the MVCS folder layout` — done in `b907584`; entry point and root view moved to `tao-24/App/`, `@main` struct renamed `Tao24Universe`. No build-setting change: `project.pbxproj` is the source of truth and keeps iOS 26.5 / Swift 5. Follow-ups `f528190` (swift-format config, 4-space) and `a9b6fd5` (capitalize struct) landed with it
-- [ ] ~~`[M1.1] Add tao-24Tests unit test target and verify script`~~ — **deferred, not done.** Dropped from M1.1 by decision on Sep 27, 2026; the milestone was marked complete without it. Still rooted at `tao-24Tests/` when it lands, never under the synced `tao-24/` group. See Future tasks
+- [x] `[M1.1] Add tao-24Tests unit test target` — deferred on Sep 27, 2026, then un-deferred the same day and landed in `2989277` ahead of `DatabaseService`, whose claims are behavioural. Rooted at `tao-24Tests/` with a checked-in shared scheme. No `verify.sh` yet — `xcodebuild test` plus `swift-format lint --strict` cover it for now
 - [x] `[M1.1] Add DimensionDomain and the core design tokens` — deep-dark system, **dark-only** (app locks `.preferredColorScheme(.dark)`). `docs/design-tokens.json` is the spec; `ColorTokens`/`TypographyTokens`/`LayoutTokens` mirror it, cross-checked in CI-able form. Absorbs the Stage 3 component commit: `TaoCard`, `DomainPill`, `CompletionRing`, `GlowEffect`
 - [x] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — split as flagged, into three commits that each build: `8c6a9ce` (`HabitFrequency` + `Weekday`), `546f55d` (`Habit`, `HabitExecutionLog`, `LifeGoal` — mutually referential, so together), `9bb5b50` (`UserValueProfile` + onboarding enums)
 - [x] `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` — both `#Index` declarations, `SchemaV1`, and `HabitQuery`/`ExecutionLogQuery`/`LifeGoalQuery`/`UserValueProfileQuery` descriptor factories. `#Unique` on `[habitID, completedDayStart]` deliberately **not** added: its interaction with the existing unique `id` is upsert behaviour that cannot be verified without running the app. Revisit when a test target exists
@@ -231,14 +228,13 @@ phase this short.
 - Blocked on: nothing. `project.pbxproj` is the source of truth for build
   settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
   is available at that floor.
-- Verified: **clean build succeeds** on iPhone 17 / iOS 26.5 as of Sep 27,
-  2026 — zero errors, zero source warnings. Run it with
-  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -scheme
-  tao-24 -destination 'platform=iOS Simulator,name=iPhone 17' build`; no
-  `sudo` needed. Note iPhone 16 is not installed on this machine.
-- Still unverified: nothing has been *run* or tested. With the test target
-  deferred, the automated checks are `swift-format lint --strict` and the
-  build; behaviour is unexercised.
+- Verified: clean build **and** `xcodebuild test` both pass on iPhone 17 /
+  iOS 26.5 — 10 tests, 0 failures, zero source warnings. Prefix commands with
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`; no `sudo`
+  needed. Note iPhone 16 is not installed on this machine.
+- Still unverified: the app has never been *launched*, and no SwiftData
+  round-trip has been exercised against a real `ModelContainer` — the tests so
+  far cover pure value types only. `DatabaseService` is where that starts.
 - Deferred to M3.3: the store's data protection level. `CLAUDE.md` requires
   Complete File Protection, which makes the store unreadable while the device
   is locked and so breaks WidgetKit timeline refresh. It is an entitlement, not

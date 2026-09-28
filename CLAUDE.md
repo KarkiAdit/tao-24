@@ -37,8 +37,8 @@ are ahead of it.
 - Architecture: Feature-Oriented MVCS (Model–View–Controller–Service)
 - System integration: WidgetKit, UserNotifications
 - Target: iOS 26.5 (`IPHONEOS_DEPLOYMENT_TARGET = 26.5`)
-- Test runner: XCTest — **no test target exists yet**; add one in Xcode
-  (File > New > Target > Unit Testing Bundle) before `/test` means anything
+- Test runner: XCTest, target `tao-24Tests` at the repo root (never under
+  `tao-24/`, where the synchronized group would bundle tests into the app)
 - Lint/format: swift-format, invoked via `xcrun`
 
 No third-party dependencies. That's deliberate — see Rules.
@@ -59,6 +59,10 @@ xcrun simctl list devices available
 
 # run in simulator / SwiftUI previews — open Xcode for this specifically
 open tao-24.xcodeproj
+
+# run one test class
+xcodebuild test -scheme tao-24 -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -only-testing:tao-24Tests/HabitFrequencyTests
 
 # lint / format
 xcrun swift-format lint -r .
