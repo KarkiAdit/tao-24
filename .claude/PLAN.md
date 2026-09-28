@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 27, 2026 — entities, schema and indexes done; DatabaseService remains._
+_Last updated: Sep 27, 2026 — Phase 01 complete; app launches and renders seeded data._
 
 ## Roadmap
 
@@ -39,10 +39,10 @@ run; the planner turns each task into one or more discrete commits under
         <!-- Fully done, including the "reusable custom card containers"
              clause: TaoCard, DomainPill, CompletionRing and
              GlowEffect all shipped with the tokens. -->
-- [ ] **Milestone 1.2 — SwiftData Engine & Schema Definition**
+- [x] **Milestone 1.2 — SwiftData Engine & Schema Definition**  _(complete)_
   - [x] Task 1: Implement `@Model` definitions for `Habit`,
         `HabitExecutionLog`, `LifeGoal`, and `UserValueProfile`.
-  - [ ] Task 2: Set up the `DatabaseService` singleton to configure
+  - [x] Task 2: Set up the `DatabaseService` singleton to configure
         `ModelContainer` with schema migrations and seed initial default
         templates.
 
@@ -184,12 +184,12 @@ has standalone work in this phase.
 
 ### Stage 2 — Core Logic
 
-- [ ] `[M1.2] Implement DatabaseService with migration plan and seeding` `[!]` — `@MainActor` singleton, `nonisolated` in-memory container factory, idempotent seed, plus tests
+- [x] `[M1.2] Implement DatabaseService with migration plan and seeding` `[!]` — `58602c6`. Idempotent by construction (inserts only what is absent, so it self-repairs a partial seed), `nonisolated` in-memory factory, `isEphemeral` surfaced when the on-disk store fails. 13 tests against a live container
 
 ### Stage 3 — Integration
 
 - [x] ~~`[M1.1] Add CardContainer and DomainTagPill with previews`~~ — superseded: shipped as `TaoCard` and `DomainPill` in the design-tokens commit, alongside `CompletionRing` and `GlowEffect`. The pill still pairs colour with icon and label so colour is never the sole domain signal
-- [ ] `[M1.2] Attach the ModelContainer and replace the template ContentView` — wires the app scene and drops the starter scaffolding
+- [x] `[M1.2] Attach the ModelContainer and replace the template ContentView` — `1c8b12f`. `RootView` reads seeded goals through `@Query`; `ContentView` deleted. Followed by `07cde24`, which fixed a `textMuted` contrast failure the first real launch exposed and made the palette rule executable
 
 ### Stage 4 — Verification
 
@@ -218,23 +218,26 @@ phase this short.
 
 ## Status
 
-- Current stage: Stage 1 — M1.2 Task 1 done on branch
-  `feat/m1-2-swiftdata-schema`, not yet merged
+- Current stage: **Phase 01 complete** on branch `feat/m1-2-swiftdata-schema`,
+  pushed, not yet merged to `main`
 - Done: **Milestone 1.1**, all three Notion tasks — agentic setup, MVCS
   folder layout (`b907584`, `f528190`, `a9b6fd5`, `90bab25`), design system
   (`3d992ce`). Merged to `main` and pushed.
-- In progress: nothing — next is M1.2 Task 2 (`DatabaseService`), the last
-  commit in Phase 01
+- In progress: nothing — Phase 02 (Starter Hub) is next
 - Blocked on: nothing. `project.pbxproj` is the source of truth for build
   settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
   is available at that floor.
-- Verified: clean build **and** `xcodebuild test` both pass on iPhone 17 /
-  iOS 26.5 — 10 tests, 0 failures, zero source warnings. Prefix commands with
+- Verified: clean build, **29 tests passing**, and the app **launched in the
+  simulator** rendering its seeded goals. Prefix commands with
   `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`; no `sudo`
-  needed. Note iPhone 16 is not installed on this machine.
-- Still unverified: the app has never been *launched*, and no SwiftData
-  round-trip has been exercised against a real `ModelContainer` — the tests so
-  far cover pure value types only. `DatabaseService` is where that starts.
+  needed.
+- **Deployment target warning:** at 26.5 the app will not install on the iOS
+  26.4 simulator — one patch behind is already excluded, and installation
+  fails outright rather than degrading. Worth revisiting before TestFlight.
+  `project.pbxproj` remains the source of truth, so lowering it is a
+  deliberate decision, not a default.
+- Still unverified: no UI interaction is exercised. Tests cover value types
+  and the store; nothing taps a `CompletionRing` or scrolls a list.
 - Deferred to M3.3: the store's data protection level. `CLAUDE.md` requires
   Complete File Protection, which makes the store unreadable while the device
   is locked and so breaks WidgetKit timeline refresh. It is an entitlement, not
@@ -245,6 +248,4 @@ phase this short.
   with `CLAUDE.md`'s layout; plan follows `CLAUDE.md`. M1.2 Task 2's "default
   templates" are seeded as three per-domain `LifeGoal`s plus the singleton
   profile — blueprints stay a static code catalog, not rows.
-- Next step: `[M1.2] Implement DatabaseService with migration plan and
-  seeding` — builds the `ModelContainer` from `SchemaV1`, seeds three
-  per-domain `LifeGoal`s and the singleton `UserValueProfile` idempotently
+- Next step: merge to `main`, then Phase 02 Milestone 2.1 — the Starter Hub
