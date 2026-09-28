@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 27, 2026 — Milestone 2.2 complete; both hubs run._
+_Last updated: Sep 27, 2026 — Milestone 2.3 complete; all three hubs run._
 
 ## Roadmap
 
@@ -63,13 +63,13 @@ run; the planner turns each task into one or more discrete commits under
   - [x] Task 3: Develop `BlueprintDetailSheet` modal and implement the "Adopt
         Plan" action to automatically batch-insert 3 pre-packaged habits into
         SwiftData.
-- [ ] **Milestone 2.3 — Progress Hub (Data Visualization)**
-  - [ ] Task 1: Build `ProgressHubView` with a time-frame segmented selector
+- [x] **Milestone 2.3 — Progress Hub (Data Visualization)**  _(complete)_
+  - [x] Task 1: Build `ProgressHubView` with a time-frame segmented selector
         (7 Days, 30 Days, 90 Days).
-  - [ ] Task 2: Implement `DimensionBalanceWheel` custom Canvas view to render
+  - [x] Task 2: Implement `DimensionBalanceWheel` custom Canvas view to render
         the 3-axis radar chart calculating weekly effort distribution across
         Health, Career, and Fun.
-  - [ ] Task 3: Implement `ConsistencyBarChart` using Swift Charts to display
+  - [x] Task 3: Implement `ConsistencyBarChart` using Swift Charts to display
         daily completion ratios over time.
 - [ ] **Milestone 2.4 — Onboarding Questionnaire & Personalization Engine**
   - [ ] Task 1: Build `OnboardingContainerView` featuring a 5-step
@@ -123,7 +123,7 @@ Deferred past the MVP; raised so they are not mistaken for oversights.
 ## Active Milestone
 
 - **Phase:** 02 — Feature-by-Feature Core Implementation
-- **Milestone:** 2.2 — Habit Planner _(complete)_; 2.3 Progress Hub is next
+- **Milestone:** 2.3 — Progress Hub _(complete)_; 2.4 Onboarding is next
 - **Planned commits:** 3 remaining of 8; Milestone 1.1 is complete
 
 Milestone 1.1 is complete and pushed: agentic setup, MVCS folder structure,
@@ -142,75 +142,72 @@ Xcode created them. M1.1 Task 1 therefore ships no build-setting change; see
 
 ## Problem
 
-Milestone 2.2 is the half of the product that explains rather than tracks. The
-decisions that mattered were about content ownership and about what "adopted"
-means, not about layout.
+Milestone 2.3 is where the no-streak stance had to become arithmetic rather
+than a principle. Three decisions carried the work:
 
-- **Blueprints and reads are code, not rows.** Read-only app content as
-  SwiftData rows would turn every copy edit into a migration and sync three
-  identical copies of fixed text to every device. The user's adopted habits
-  are rows; the template is not.
-- **Adopted-ness is derived, never stored.** A blueprint is a template, not a
-  subscription. Once adopted the habits belong to the user, who may rename or
-  archive them, so an "adopted" flag would start lying immediately. Matching
-  title and domain against active habits makes partial adoption the normal
-  path rather than an edge case.
+- **The denominator is per-day and historical.** A habit counts on a day only
+  if it was due then and already existed, so adding a habit today cannot
+  retroactively ruin last month, and a 3x-a-week habit is not marked down for
+  the four days it was never meant to happen.
+- **A rest day is not a missed day.** `DailyCompletion.hasSchedule` is
+  separate from `ratio`, the chart draws rest days as a faint baseline, and
+  the average excludes them.
+- **Balance is a ratio, not a tolerance.** Settled by running the screen — see
+  Verification.
 
 ## Task Breakdown
 
-4 commits, each building green.
-
-### Stage 1 — Data & Contracts
-
-- [x] `[M2.2] Add the blueprint and micro-resource catalog` — `3424e2f`.
-      Three sets, four reads, as a static `Sendable` catalog. A test enforces
-      that every set spans all three dimensions
+2 commits, both building green.
 
 ### Stage 2 — Core Logic
 
-- [x] `[M2.2] Add BlueprintService for adopting a set` — `9271628`. Derived
-      adopted-ness, case-insensitive but domain-sensitive matching, partial
-      adoption, and archived habits not blocking re-adoption
+- [x] `[M2.3] Add ProgressService: trends, distribution, and consistency` —
+      `60e3d46`. Also threaded `Calendar` through `HabitExecutionService`,
+      which had hard-coded `.current` and so could not agree with any caller
+      bucketing days differently
 
 ### Stage 3 — Integration
 
-- [x] `[M2.2] Build the Habit Planner: portals, reads, and blueprint
-      adoption` — `PlannerHubController`, `PlannerHubView`,
-      `BlueprintDetailSheet`, plus the two-tab bar that makes the screen
-      reachable
+- [x] `[M2.3] Build the Progress Hub: balance wheel and consistency chart` —
+      `ProgressHubController`, `ProgressHubView`, the Canvas radar, the Swift
+      Charts bar chart, and the Progress tab
 
 ### Stage 4 — Verification
 
-Folded in: 21 new tests across the service and controller, and the screen was
-exercised in the simulator.
+Folded in: 19 new tests, plus the screen exercised in the simulator — which is
+what caught the balance-threshold bug. The badge claimed "spread evenly" above
+a 40/40/20 breakdown because the old ±15-point tolerance allowed a 2.6x gap.
+Now a max/min ratio capped at 1.5, with a regression test.
 
 ### Stage 5 — Cleanup
 
-The temporary tab reorder used to screenshot the Planner was reverted before
-commit.
+Both temporary scaffolds — the demo history and the tab reorder used for
+screenshots — were reverted before commit.
 
 ## Tooling
 
-- Test fakes & mocks: none — `DatabaseService.makeContainer(inMemory:)` gives
-  each test a real isolated store
+- Test fakes & mocks: none — in-memory containers throughout
 - Reproduction scripts: none
 - Custom skills: none
 - Background automations: none
 
 ## Status
 
-- Current stage: **Milestone 2.2 complete** on `feat/m2-2-habit-planner`
-- Done: Phase 01 in full; M2.1 Starter Hub; M2.2 Habit Planner
-- In progress: nothing — M2.3 (Progress Hub) is next
+- Current stage: **Milestone 2.3 complete** on `feat/m2-3-progress-hub`
+- Done: Phase 01 in full; M2.1 Starter Hub; M2.2 Habit Planner; M2.3 Progress
+  Hub
+- In progress: nothing — M2.4 (Onboarding questionnaire) is next, and it is
+  the last milestone in Phase 02
 - Blocked on: nothing
-- Verified: 79 tests passing, clean build, both hubs exercised in the simulator
-- Partly pulled forward: **M3.1 Task 1** (tab navigation) is half done. The
-  bar exists with Today and Plan; M3.1 still owns the Progress tab and the
-  onboarding deep link.
-- Still unverified: no automated UI interaction anywhere. Adoption, the
-  accordion and the quick-add sheet are covered at controller level and by
-  hand, not through the view.
+- Verified: 98 tests passing, clean build, all three hubs exercised in the
+  simulator
+- Partly pulled forward: **M3.1 Task 1** (tab navigation) is now effectively
+  done — all three tabs exist. M3.1 still owns the onboarding deep link.
+- Not in M2.3's task list, but in the PoC's Progress screen: the **Milestone
+  Log** and the **weekly Reflection CTA**. The reflection prompt belongs to the
+  unplanned Ethical Engagement phase; the milestone log has no home yet.
+- Still unverified: no automated UI interaction anywhere.
 - Carried forward: iOS 26.5 still refuses to install on the 26.4 simulator;
   `#Unique` on `[habitID, completedDayStart]` still unadded.
-- Next step: Milestone 2.3 — Progress Hub (balance wheel, consistency chart,
-  milestones)
+- Next step: Milestone 2.4 — Onboarding questionnaire and personalization
+  engine
