@@ -38,8 +38,8 @@
     "text": {
       "primary":   { "value": "#FFFFFF", "contrastOnSurface": 18.73, "usage": "Headings, habit names, metrics." },
       "secondary": { "value": "#B3B3B3", "contrastOnSurface": 8.93,  "usage": "Supporting copy, metadata, inactive tabs." },
-      "muted":     { "value": "#8A8A8A", "contrastOnSurface": 5.43,  "usage": "Timestamps, the quietest labels.",
-                     "note": "The reference grey #6A6A6A measures 3.46 on #121212 and fails AA. Lightened deliberately." }
+      "muted":     { "value": "#909090", "contrastOnSurface": 5.87, "contrastOnOverlay": 4.62, "usage": "Timestamps, the quietest labels.",
+                     "note": "Lightened twice. The reference grey #6A6A6A measures 3.46 and fails outright. #8A8A8A then passed on the surface but failed at 4.27 on the #282828 overlay, which is where muted text lands inside a pill or pressed row. Every text token is now checked against all four surfaces by ContrastTests." }
     },
 
     "border": {

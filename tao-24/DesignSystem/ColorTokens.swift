@@ -52,61 +52,101 @@ extension Color {
 /// Never write a literal `Color` in a view. Add a token.
 enum ColorTokens {
 
+    /// The raw values, exposed so `ContrastTests` can verify the palette
+    /// rather than the rule living only in a comment. Nothing outside the
+    /// tests should reach for these — use the `Color` properties below.
+    enum Hex {
+        static let backgroundBase = "#000000"
+        static let backgroundSurface = "#121212"
+        static let backgroundCard = "#181818"
+        static let backgroundOverlay = "#282828"
+
+        static let textPrimary = "#FFFFFF"
+        static let textSecondary = "#B3B3B3"
+        static let textMuted = "#909090"
+
+        static let healthAccent = "#30D158"
+        static let careerAccent = "#0A84FF"
+        static let funAccent = "#FF5500"
+        static let onAccent = "#000000"
+
+        static let borderSubtle = "#2A2A2A"
+        static let borderStrong = "#3E3E3E"
+
+        static let statusPositive = "#30D158"
+        static let statusNotice = "#FFD60A"
+
+        /// Every surface text can legibly sit on.
+        static let allSurfaces = [
+            backgroundBase, backgroundSurface, backgroundCard, backgroundOverlay,
+        ]
+
+        /// Every foreground that carries words.
+        static let allTextTokens = [textPrimary, textSecondary, textMuted]
+
+        /// The three domain accents.
+        static let allAccents = [healthAccent, careerAccent, funAccent]
+    }
+
     // MARK: Backgrounds — each step up is a luminance step, not a shadow
 
     /// App ground, behind scroll content and under sheets.
-    static let backgroundBase = Color(hex: "#000000")
+    static let backgroundBase = Color(hex: Hex.backgroundBase)
 
     /// Default screen surface. The reference background for all contrast math.
-    static let backgroundSurface = Color(hex: "#121212")
+    static let backgroundSurface = Color(hex: Hex.backgroundSurface)
 
     /// Cards and rows lifted off the surface.
-    static let backgroundCard = Color(hex: "#181818")
+    static let backgroundCard = Color(hex: Hex.backgroundCard)
 
     /// Pressed and hovered states, unfilled progress tracks, sheet grabbers.
-    static let backgroundOverlay = Color(hex: "#282828")
+    static let backgroundOverlay = Color(hex: Hex.backgroundOverlay)
 
     // MARK: Text — ratios are against `backgroundSurface`
 
     /// Headings, habit names, metrics. 18.73:1.
-    static let textPrimary = Color(hex: "#FFFFFF")
+    static let textPrimary = Color(hex: Hex.textPrimary)
 
     /// Supporting copy, metadata, inactive tabs. 8.93:1.
-    static let textSecondary = Color(hex: "#B3B3B3")
+    static let textSecondary = Color(hex: Hex.textSecondary)
 
-    /// Timestamps and the quietest labels. 5.43:1.
+    /// Timestamps and the quietest labels. 5.87:1 on the surface, 4.62:1 on
+    /// the overlay — its worst case, and the value that sets this token.
     ///
-    /// The reference grey this was drawn from, `#6A6A6A`, measures 3.46:1 and
-    /// fails AA. Lightened deliberately; do not "correct" it back.
-    static let textMuted = Color(hex: "#8A8A8A")
+    /// Lightened twice, both times deliberately. The reference grey `#6A6A6A`
+    /// measures 3.46:1 and fails outright. `#8A8A8A` then passed on the
+    /// surface but failed at 4.27:1 on `backgroundOverlay`, which is where
+    /// muted text actually lands inside a pill or a pressed row — caught only
+    /// by checking every surface rather than the default one. Do not darken.
+    static let textMuted = Color(hex: Hex.textMuted)
 
     // MARK: Domain accents — prefer the `DimensionDomain` accessors
 
-    static let healthAccent = Color(hex: "#30D158")
-    static let careerAccent = Color(hex: "#0A84FF")
-    static let funAccent = Color(hex: "#FF5500")
+    static let healthAccent = Color(hex: Hex.healthAccent)
+    static let careerAccent = Color(hex: Hex.careerAccent)
+    static let funAccent = Color(hex: Hex.funAccent)
 
     /// Label colour on a filled accent. Black against all three — every accent
     /// is bright enough that white would fail.
-    static let onAccent = Color(hex: "#000000")
+    static let onAccent = Color(hex: Hex.onAccent)
 
     // MARK: Borders
 
     /// Hairline dividers. Rare — luminance separates surfaces first.
-    static let borderSubtle = Color(hex: "#2A2A2A")
+    static let borderSubtle = Color(hex: Hex.borderSubtle)
 
     /// Focus rings and outlined controls.
-    static let borderStrong = Color(hex: "#3E3E3E")
+    static let borderStrong = Color(hex: Hex.borderStrong)
 
     // MARK: Status
 
     /// Completion confirmed. Shares the Health hue deliberately, so the app
     /// speaks one positive language.
-    static let statusPositive = Color(hex: "#30D158")
+    static let statusPositive = Color(hex: Hex.statusPositive)
 
     /// Gentle attention. Never applied to a missed habit.
     ///
     /// There is deliberately no error colour for habit completion: missing a
     /// day is not a failure state. See the product rules in `CLAUDE.md`.
-    static let statusNotice = Color(hex: "#FFD60A")
+    static let statusNotice = Color(hex: Hex.statusNotice)
 }

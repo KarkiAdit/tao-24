@@ -176,10 +176,13 @@ Rules:
 - **There is no error colour for habit completion.** An incomplete ring is
   neutral grey, never red, and un-completing animates exactly like completing.
   Missing a day is not a failure state.
-- Every text token clears 4.5:1 on `#121212` and every accent clears 4.5:1 on
-  all four dark surfaces. Re-measure when adding one rather than eyeballing
-  it; the reference grey `#6A6A6A` fails at 3.46:1, which is why ours is
-  `#8A8A8A`.
+- Contrast is enforced by `ContrastTests`, not by eye or by comment: every
+  text token against **all four** surfaces at 4.5:1, every accent at 3:1 as UI
+  and 4.5:1 as text, and every `onAccent` against its own fill. Add a token to
+  `ColorTokens.Hex` and it is checked automatically.
+- Checking only the default surface is how a bug ships: `textMuted` passed at
+  5.43:1 on `#121212` while failing at 4.27:1 on `#282828`, which is exactly
+  where muted text sits inside a pill. It is `#909090` now — do not darken it.
 
 ### MVCS layer boundaries
 
