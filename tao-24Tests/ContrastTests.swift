@@ -71,6 +71,21 @@ final class ContrastTests: XCTestCase {
         }
     }
 
+    func testEveryControlOutlineIsVisibleOnEverySurface() {
+        // An unchecked ring is the checklist's primary affordance. borderStrong
+        // measured 1.66:1 here before controlOutline existed.
+        for outline in ColorTokens.Hex.allControlOutlines {
+            for surface in ColorTokens.Hex.allSurfaces {
+                let ratio = Self.contrastRatio(outline, surface)
+                XCTAssertGreaterThanOrEqual(
+                    ratio,
+                    uiMinimum,
+                    "\(outline) on \(surface) is \(String(format: "%.2f", ratio)):1"
+                )
+            }
+        }
+    }
+
     func testTheKnownRegressionStaysFixed() {
         // textMuted on backgroundOverlay: 4.27:1 before, must stay above 4.5.
         let ratio = Self.contrastRatio(

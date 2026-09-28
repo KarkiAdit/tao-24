@@ -26,7 +26,7 @@ struct CompletionRing: View {
             ZStack {
                 Circle()
                     .strokeBorder(
-                        isComplete ? domain.accent : ColorTokens.borderStrong,
+                        isComplete ? domain.accent : ColorTokens.controlOutline,
                         lineWidth: LayoutTokens.Stroke.ring
                     )
 

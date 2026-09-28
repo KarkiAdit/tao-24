@@ -44,7 +44,10 @@
 
     "border": {
       "subtle": { "value": "#2A2A2A", "usage": "Hairline dividers. Rare — luminance separates surfaces first." },
-      "strong": { "value": "#3E3E3E", "usage": "Focus rings and outlined controls." }
+      "strong": { "value": "#3E3E3E", "usage": "Decorative emphasis on a divider. NOT for interactive controls — 1.66:1 on a card." },
+      "controlOutline": { "value": "#7A7A7A", "contrastOnCard": 4.14, "contrastOnOverlay": 3.43,
+                          "usage": "Resting outline of an interactive control: an unchecked completion ring, an unfilled field.",
+                          "note": "Added after the first run of the Starter Hub. The ring had used border.strong, which measured 1.66:1 against its own card and made the checklist's primary affordance nearly invisible. Checked on all four surfaces by ContrastTests." }
     },
 
     "status": {

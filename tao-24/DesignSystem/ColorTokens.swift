@@ -72,6 +72,7 @@ enum ColorTokens {
 
         static let borderSubtle = "#2A2A2A"
         static let borderStrong = "#3E3E3E"
+        static let controlOutline = "#7A7A7A"
 
         static let statusPositive = "#30D158"
         static let statusNotice = "#FFD60A"
@@ -86,6 +87,11 @@ enum ColorTokens {
 
         /// The three domain accents.
         static let allAccents = [healthAccent, careerAccent, funAccent]
+
+        /// Tokens that outline an interactive control. Held to the 3:1 bar for
+        /// non-text UI on every surface — an unchecked ring that cannot be
+        /// seen is not an affordance.
+        static let allControlOutlines = [controlOutline]
     }
 
     // MARK: Backgrounds — each step up is a luminance step, not a shadow
@@ -135,8 +141,17 @@ enum ColorTokens {
     /// Hairline dividers. Rare — luminance separates surfaces first.
     static let borderSubtle = Color(hex: Hex.borderSubtle)
 
-    /// Focus rings and outlined controls.
+    /// Decorative emphasis on a divider. Not for anything interactive — at
+    /// 1.66:1 on a card it is invisible as a control. Use `controlOutline`.
     static let borderStrong = Color(hex: Hex.borderStrong)
+
+    /// The outline of an interactive control in its resting state — an
+    /// unchecked completion ring, an unfilled field.
+    ///
+    /// 4.14:1 on a card and 3.43:1 on the overlay. `borderStrong` was used
+    /// here first and measured 1.66:1, which made the checklist's primary
+    /// control almost invisible against its own card.
+    static let controlOutline = Color(hex: Hex.controlOutline)
 
     // MARK: Status
 
