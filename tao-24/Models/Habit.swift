@@ -15,6 +15,10 @@ import SwiftData
 @Model
 final class Habit {
 
+    /// Carries the domain-portal filter. `domainRawValue` leads because it is
+    /// the selective column — three values against two — so it narrows first.
+    #Index<Habit>([\.domainRawValue, \.isArchived])
+
     /// Stable identity across devices.
     ///
     /// `.unique` is a local-store constraint that CloudKit mirroring does not

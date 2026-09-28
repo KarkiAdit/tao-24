@@ -18,6 +18,11 @@ import SwiftData
 @Model
 final class HabitExecutionLog {
 
+    /// Carries the Starter Hub's hot path: "what did this habit do today?"
+    /// Both columns exist specifically to make this declarable — see the type
+    /// documentation above.
+    #Index<HabitExecutionLog>([\.habitID, \.completedDayStart])
+
     @Attribute(.unique) var id: UUID
 
     /// The precise moment, for display and ordering.
