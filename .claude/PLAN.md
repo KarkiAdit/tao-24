@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 27, 2026 — Milestone 2.1 complete; the Starter Hub runs._
+_Last updated: Sep 27, 2026 — Milestone 2.2 complete; both hubs run._
 
 ## Roadmap
 
@@ -55,12 +55,12 @@ run; the planner turns each task into one or more discrete commits under
         trigger instant local logging via `HabitExecutionService`.
   - [x] Task 3: Create `QuickAddHabitSheet` modal to allow manual creation of
         custom habits tied to specific domains.
-- [ ] **Milestone 2.2 — Habit Planner Screen (Discovery & Blueprint System)**
-  - [ ] Task 1: Construct `PlannerHubView` displaying the 3 main "Dimensions
+- [x] **Milestone 2.2 — Habit Planner Screen (Discovery & Blueprint System)**  _(complete)_
+  - [x] Task 1: Construct `PlannerHubView` displaying the 3 main "Dimensions
         of Joy" hero cards.
-  - [ ] Task 2: Implement horizontal micro-resource feed showcasing 1-minute
+  - [x] Task 2: Implement horizontal micro-resource feed showcasing 1-minute
         educational insight cards.
-  - [ ] Task 3: Develop `BlueprintDetailSheet` modal and implement the "Adopt
+  - [x] Task 3: Develop `BlueprintDetailSheet` modal and implement the "Adopt
         Plan" action to automatically batch-insert 3 pre-packaged habits into
         SwiftData.
 - [ ] **Milestone 2.3 — Progress Hub (Data Visualization)**
@@ -123,7 +123,7 @@ Deferred past the MVP; raised so they are not mistaken for oversights.
 ## Active Milestone
 
 - **Phase:** 02 — Feature-by-Feature Core Implementation
-- **Milestone:** 2.1 — Starter Hub _(complete)_; 2.2 Habit Planner is next
+- **Milestone:** 2.2 — Habit Planner _(complete)_; 2.3 Progress Hub is next
 - **Planned commits:** 3 remaining of 8; Milestone 1.1 is complete
 
 Milestone 1.1 is complete and pushed: agentic setup, MVCS folder structure,
@@ -142,72 +142,75 @@ Xcode created them. M1.1 Task 1 therefore ships no build-setting change; see
 
 ## Problem
 
-Milestone 2.1 turns the store into a usable screen. The risk was not the
-SwiftUI — it was keeping the MVCS boundary while wiring `@Query`, a Service
-and a Controller together, since that is the seam where a view starts writing
-to a `ModelContext` "just this once".
+Milestone 2.2 is the half of the product that explains rather than tracks. The
+decisions that mattered were about content ownership and about what "adopted"
+means, not about layout.
 
-Two things settled during the work:
-
-- **Filtering is presentation state, not a predicate.** The view holds one
-  `@Query` for active habits; the controller narrows it. Switching a chip is
-  free, and the filter logic is testable against a plain array.
-- **No streak API, in any form.** `HabitExecutionService` deliberately omits
-  the reference `calculateCurrentStreak`. Progress is a count today and a
-  trend in M2.3.
+- **Blueprints and reads are code, not rows.** Read-only app content as
+  SwiftData rows would turn every copy edit into a migration and sync three
+  identical copies of fixed text to every device. The user's adopted habits
+  are rows; the template is not.
+- **Adopted-ness is derived, never stored.** A blueprint is a template, not a
+  subscription. Once adopted the habits belong to the user, who may rename or
+  archive them, so an "adopted" flag would start lying immediately. Matching
+  title and domain against active habits makes partial adoption the normal
+  path rather than an edge case.
 
 ## Task Breakdown
 
-4 commits, all landed and each building green.
+4 commits, each building green.
 
 ### Stage 1 — Data & Contracts
 
-- [x] `[M2.1] Add HabitExecutionService for completion logging` — `a031228`.
-      Completion state, log, undo, toggle, and habit creation that enforces
-      the goal anchor. No streak API
+- [x] `[M2.2] Add the blueprint and micro-resource catalog` — `3424e2f`.
+      Three sets, four reads, as a static `Sendable` catalog. A test enforces
+      that every set spans all three dimensions
 
 ### Stage 2 — Core Logic
 
-- [x] `[M2.1] Add StarterHubController for the daily checklist` — `abd12df`.
-      Filter, quick-add draft, derived visible list and completion count
+- [x] `[M2.2] Add BlueprintService for adopting a set` — `9271628`. Derived
+      adopted-ness, case-insensitive but domain-sensitive matching, partial
+      adoption, and archived habits not blocking re-adoption
 
 ### Stage 3 — Integration
 
-- [x] `[M2.1] Build the Starter Hub: daily checklist, rows, and quick-add` —
-      `c11c902`. `StarterHubView`, `HabitRowCard`, `QuickAddHabitSheet`, and
-      `RootView` switched over from the placeholder
+- [x] `[M2.2] Build the Habit Planner: portals, reads, and blueprint
+      adoption` — `PlannerHubController`, `PlannerHubView`,
+      `BlueprintDetailSheet`, plus the two-tab bar that makes the screen
+      reachable
 
 ### Stage 4 — Verification
 
-- [x] `[M2.1] Add controlOutline so the completion ring is actually visible` —
-      `2c8c85f`. Found by running the screen, not by a test
+Folded in: 21 new tests across the service and controller, and the screen was
+exercised in the simulator.
 
 ### Stage 5 — Cleanup
 
-Nothing accumulated. The temporary demo-seed used to screenshot the populated
-list was reverted before commit.
+The temporary tab reorder used to screenshot the Planner was reverted before
+commit.
 
 ## Tooling
 
-- Test fakes & mocks: none needed — `DatabaseService.makeContainer(inMemory:)`
-  gives every test a real, isolated store
+- Test fakes & mocks: none — `DatabaseService.makeContainer(inMemory:)` gives
+  each test a real isolated store
 - Reproduction scripts: none
 - Custom skills: none
 - Background automations: none
 
 ## Status
 
-- Current stage: **Milestone 2.1 complete** on `feat/m2-1-starter-hub`
-- Done: Phase 01 in full, plus M2.1's three Notion tasks
-- In progress: nothing — M2.2 (Habit Planner) is next
+- Current stage: **Milestone 2.2 complete** on `feat/m2-2-habit-planner`
+- Done: Phase 01 in full; M2.1 Starter Hub; M2.2 Habit Planner
+- In progress: nothing — M2.3 (Progress Hub) is next
 - Blocked on: nothing
-- Verified: 58 tests passing, clean build, and the hub **exercised in the
-  simulator** in both empty and populated states
-- Still unverified: no automated UI interaction. Nothing taps a ring or opens
-  the quick-add sheet in a test — the flows are covered at the controller
-  level, not through the view. A UI test target would close it.
-- Carried forward: the iOS 26.5 deployment target still refuses to install on
-  the 26.4 simulator; `#Unique` on `[habitID, completedDayStart]` is still
-  unadded, and now cheap to verify since a test target exists.
-- Next step: Milestone 2.2 — Habit Planner (dimension portals, blueprints,
-  micro-resources)
+- Verified: 79 tests passing, clean build, both hubs exercised in the simulator
+- Partly pulled forward: **M3.1 Task 1** (tab navigation) is half done. The
+  bar exists with Today and Plan; M3.1 still owns the Progress tab and the
+  onboarding deep link.
+- Still unverified: no automated UI interaction anywhere. Adoption, the
+  accordion and the quick-add sheet are covered at controller level and by
+  hand, not through the view.
+- Carried forward: iOS 26.5 still refuses to install on the 26.4 simulator;
+  `#Unique` on `[habitID, completedDayStart]` still unadded.
+- Next step: Milestone 2.3 — Progress Hub (balance wheel, consistency chart,
+  milestones)
