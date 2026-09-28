@@ -36,8 +36,12 @@ final class StarterHubController {
 
     private let executionService: HabitExecutionService
 
-    init(executionService: HabitExecutionService = .shared) {
-        self.executionService = executionService
+    /// Takes `nil` rather than defaulting to `.shared` in the signature:
+    /// default-argument expressions are evaluated nonisolated in Swift 5 mode,
+    /// so naming the main-actor singleton there warns. Resolving it in the
+    /// body keeps injection available without the warning.
+    init(executionService: HabitExecutionService? = nil) {
+        self.executionService = executionService ?? .shared
     }
 
     // MARK: Derived state

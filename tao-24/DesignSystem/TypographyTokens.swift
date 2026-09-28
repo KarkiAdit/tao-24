@@ -27,6 +27,10 @@ enum TypographyTokens {
     /// Section headers.
     static let header3 = Font.system(.headline, weight: .semibold)
 
+    /// A counted figure — "3 of 7 done". Monospaced digits so the number does
+    /// not jitter sideways as it changes.
+    static let metric = Font.system(.title, weight: .bold).monospacedDigit()
+
     /// Reading copy.
     static let body = Font.system(.body)
 
