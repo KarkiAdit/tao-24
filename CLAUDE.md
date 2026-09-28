@@ -49,10 +49,10 @@ No third-party dependencies. That's deliberate — see Rules.
 # install — SPM resolves dependencies on build, no separate step
 
 # build (headless check, no need to open Xcode)
-xcodebuild -scheme tao-24 -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -scheme tao-24 -destination 'platform=iOS Simulator,name=iPhone 17' build
 
 # tests (once a test target exists)
-xcodebuild test -scheme tao-24 -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild test -scheme tao-24 -destination 'platform=iOS Simulator,name=iPhone 17'
 
 # list the simulators actually installed, if the destination above isn't one
 xcrun simctl list devices available
@@ -65,9 +65,17 @@ xcrun swift-format lint -r .
 xcrun swift-format format -i -r .
 ```
 
-`xcodebuild` and `simctl` need the full Xcode toolchain selected. If they
-report "requires Xcode, but active developer directory is a command line
-tools instance", run:
+`xcodebuild` and `simctl` need the full Xcode toolchain. This machine's
+`xcode-select` points at the Command Line Tools, so they fail with "requires
+Xcode, but active developer directory is a command line tools instance".
+
+Prefer the per-command override — no `sudo`, no global change:
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+```
+
+To change it machine-wide instead:
 
 ```bash
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer

@@ -230,10 +230,14 @@ phase this short.
 - Blocked on: nothing. `project.pbxproj` is the source of truth for build
   settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
   is available at that floor.
-- Unverified: **nothing in the project has ever been compiled.** `xcodebuild`
-  needs `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
-  With the test target deferred too, `main` currently has no automated check
-  beyond `swift-format lint --strict`.
+- Verified: **clean build succeeds** on iPhone 17 / iOS 26.5 as of Sep 27,
+  2026 — zero errors, zero source warnings. Run it with
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -scheme
+  tao-24 -destination 'platform=iOS Simulator,name=iPhone 17' build`; no
+  `sudo` needed. Note iPhone 16 is not installed on this machine.
+- Still unverified: nothing has been *run* or tested. With the test target
+  deferred, the automated checks are `swift-format lint --strict` and the
+  build; behaviour is unexercised.
 - Deferred to M3.3: the store's data protection level. `CLAUDE.md` requires
   Complete File Protection, which makes the store unreadable while the device
   is locked and so breaks WidgetKit timeline refresh. It is an entitlement, not
