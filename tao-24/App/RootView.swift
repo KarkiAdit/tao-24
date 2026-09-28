@@ -8,10 +8,13 @@ import SwiftUI
 
 /// App root.
 ///
-/// The Starter Hub is the only screen in the MVP so far; tab navigation across
-/// Planner and Progress arrives in M3.1. Until then this exists to own the
-/// app-level concern the hub should not carry — telling the user when their
-/// data is not being persisted.
+/// Carries the two shipped hubs and the app-level concern neither should own —
+/// telling the user when their data is not being persisted.
+///
+/// The tab bar is deliberately minimal and partly anticipates M3.1, which owns
+/// navigation properly: deep links from onboarding, and the Progress tab once
+/// M2.3 builds it. Adding it now is what makes the Planner reachable at all —
+/// a screen no one can open cannot be reviewed.
 struct RootView: View {
 
     /// True when the store could not be opened on disk. Surfaced because data
@@ -20,7 +23,14 @@ struct RootView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            StarterHubView()
+            TabView {
+                StarterHubView()
+                    .tabItem { Label("Today", systemImage: "checklist") }
+
+                PlannerHubView()
+                    .tabItem { Label("Plan", systemImage: "square.grid.2x2") }
+            }
+            .tint(ColorTokens.textPrimary)
 
             if isEphemeral {
                 ephemeralWarning
