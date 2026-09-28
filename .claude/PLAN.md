@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 27, 2026 — Milestone 1.1 complete and pushed; M1.2 next._
+_Last updated: Sep 27, 2026 — M1.2 Task 1 (the four entities) done on branch._
 
 ## Roadmap
 
@@ -40,7 +40,7 @@ run; the planner turns each task into one or more discrete commits under
              clause: TaoCard, DomainPill, CompletionRing and
              GlowEffect all shipped with the tokens. -->
 - [ ] **Milestone 1.2 — SwiftData Engine & Schema Definition**
-  - [ ] Task 1: Implement `@Model` definitions for `Habit`,
+  - [x] Task 1: Implement `@Model` definitions for `Habit`,
         `HabitExecutionLog`, `LifeGoal`, and `UserValueProfile`.
   - [ ] Task 2: Set up the `DatabaseService` singleton to configure
         `ModelContainer` with schema migrations and seed initial default
@@ -182,7 +182,7 @@ has standalone work in this phase.
 - [x] `[M1.1] Set up the MVCS folder layout` — done in `b907584`; entry point and root view moved to `tao-24/App/`, `@main` struct renamed `Tao24Universe`. No build-setting change: `project.pbxproj` is the source of truth and keeps iOS 26.5 / Swift 5. Follow-ups `f528190` (swift-format config, 4-space) and `a9b6fd5` (capitalize struct) landed with it
 - [ ] ~~`[M1.1] Add tao-24Tests unit test target and verify script`~~ — **deferred, not done.** Dropped from M1.1 by decision on Sep 27, 2026; the milestone was marked complete without it. Still rooted at `tao-24Tests/` when it lands, never under the synced `tao-24/` group. See Future tasks
 - [x] `[M1.1] Add DimensionDomain and the core design tokens` — deep-dark system, **dark-only** (app locks `.preferredColorScheme(.dark)`). `docs/design-tokens.json` is the spec; `ColorTokens`/`TypographyTokens`/`LayoutTokens` mirror it, cross-checked in CI-able form. Absorbs the Stage 3 component commit: `TaoCard`, `DomainPill`, `CompletionRing`, `GlowEffect`
-- [ ] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — `Habit`, `HabitExecutionLog`, `LifeGoal`, `UserValueProfile`; likely 300+ lines, split per entity if it runs long
+- [x] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — split as flagged, into three commits that each build: `8c6a9ce` (`HabitFrequency` + `Weekday`), `546f55d` (`Habit`, `HabitExecutionLog`, `LifeGoal` — mutually referential, so together), `9bb5b50` (`UserValueProfile` + onboarding enums)
 - [ ] `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` — both `#Index` declarations plus the canonical descriptors, so no caller hand-rolls a scanning predicate
 
 ### Stage 2 — Core Logic
@@ -221,12 +221,13 @@ phase this short.
 
 ## Status
 
-- Current stage: Stage 1 — M1.1 complete and merged to `main` (`3d992ce`,
-  pushed); M1.2 not started
+- Current stage: Stage 1 — M1.2 Task 1 done on branch
+  `feat/m1-2-swiftdata-schema`, not yet merged
 - Done: **Milestone 1.1**, all three Notion tasks — agentic setup, MVCS
   folder layout (`b907584`, `f528190`, `a9b6fd5`, `90bab25`), design system
   (`3d992ce`). Merged to `main` and pushed.
-- In progress: nothing — M1.2 is next
+- In progress: nothing — next is the SchemaV1 / indexes commit, then M1.2
+  Task 2 (`DatabaseService`)
 - Blocked on: nothing. `project.pbxproj` is the source of truth for build
   settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
   is available at that floor.
@@ -248,5 +249,7 @@ phase this short.
   with `CLAUDE.md`'s layout; plan follows `CLAUDE.md`. M1.2 Task 2's "default
   templates" are seeded as three per-domain `LifeGoal`s plus the singleton
   profile — blueprints stay a static code catalog, not rows.
-- Next step: M1.2 — `[M1.2] Add the four @Model entities with typed frequency
-  storage`
+- Next step: `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` —
+  the entities now carry the `habitID` and `completedDayStart` columns the
+  compound index needs; `#Unique` on `[habitID, completedDayStart]` is worth
+  considering there to enforce one completion per habit per day at the store
