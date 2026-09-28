@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 27, 2026 — Phase 01 complete; app launches and renders seeded data._
+_Last updated: Sep 27, 2026 — Milestone 2.1 complete; the Starter Hub runs._
 
 ## Roadmap
 
@@ -48,12 +48,12 @@ run; the planner turns each task into one or more discrete commits under
 
 ### Phase 02 — Feature-by-Feature Core Implementation
 
-- [ ] **Milestone 2.1 — Starter Hub (Daily Checklist & Log Execution)**
-  - [ ] Task 1: Build `StarterHubView` and `StarterHubController` with
+- [x] **Milestone 2.1 — Starter Hub (Daily Checklist & Log Execution)**  _(complete)_
+  - [x] Task 1: Build `StarterHubView` and `StarterHubController` with
         reactive SwiftData `@Query` binding for today's habits.
-  - [ ] Task 2: Implement `HabitRowCard` with interactive checkmarks that
+  - [x] Task 2: Implement `HabitRowCard` with interactive checkmarks that
         trigger instant local logging via `HabitExecutionService`.
-  - [ ] Task 3: Create `QuickAddHabitSheet` modal to allow manual creation of
+  - [x] Task 3: Create `QuickAddHabitSheet` modal to allow manual creation of
         custom habits tied to specific domains.
 - [ ] **Milestone 2.2 — Habit Planner Screen (Discovery & Blueprint System)**
   - [ ] Task 1: Construct `PlannerHubView` displaying the 3 main "Dimensions
@@ -122,8 +122,8 @@ Deferred past the MVP; raised so they are not mistaken for oversights.
 
 ## Active Milestone
 
-- **Phase:** 01 — Core Foundation & Data Persistence
-- **Milestone:** 1.2 — SwiftData Engine & Schema Definition
+- **Phase:** 02 — Feature-by-Feature Core Implementation
+- **Milestone:** 2.1 — Starter Hub _(complete)_; 2.2 Habit Planner is next
 - **Planned commits:** 3 remaining of 8; Milestone 1.1 is complete
 
 Milestone 1.1 is complete and pushed: agentic setup, MVCS folder structure,
@@ -142,110 +142,72 @@ Xcode created them. M1.1 Task 1 therefore ships no build-setting change; see
 
 ## Problem
 
-<!-- Problem Identification stage output: restated problem, assumptions
-     challenged, edge cases, non-goals. -->
+Milestone 2.1 turns the store into a usable screen. The risk was not the
+SwiftUI — it was keeping the MVCS boundary while wiring `@Query`, a Service
+and a Controller together, since that is the seam where a view starts writing
+to a `ModelContext` "just this once".
 
-Context and constraints are in `CLAUDE.md` — not restated here. Only the two
-schema decisions that `CLAUDE.md` does not already settle:
+Two things settled during the work:
 
-- **`targetFrequency` is a type, not a `String`.** The reference `String`
-  ("Daily"/"3x/week"/"Custom") can't say *which* days "Custom" means, and the
-  consistency rate needs a numeric denominator. Store decomposed
-  (`frequencyKindRawValue`, `weeklyTargetCount`, `customWeekdayMask`) with a
-  computed `HabitFrequency` façade — same pattern as `domain`/`domainRawValue`.
-  Not a single `Codable` enum: SwiftData stores that as a blob that can't be
-  used in `#Predicate` or indexed.
-- **The log's compound index needs a denormalized `habitID: UUID`.** `#Index`
-  can't traverse a relationship, so `\.habit.id` is illegal — without a stored
-  column there is no index. Also index `completedDayStart` (a day-normalized
-  companion to `completedAt`) rather than `completedAt`, because `Calendar`
-  calls aren't expressible in `#Predicate` at all. Gives
-  `#Index<HabitExecutionLog>([\.habitID, \.completedDayStart])` and
-  `#Index<Habit>([\.domainRawValue, \.isArchived])`.
-  `#Index` is iOS 18.0+ and the project's floor is 26.5, so it is available —
-  not a blocker.
+- **Filtering is presentation state, not a predicate.** The view holds one
+  `@Query` for active habits; the controller narrows it. Switching a chip is
+  free, and the filter logic is testable against a plain array.
+- **No streak API, in any form.** `HabitExecutionService` deliberately omits
+  the reference `calculateCurrentStreak`. Progress is a count today and a
+  trend in M2.3.
 
 ## Task Breakdown
 
-<!-- Task Development stage output. One checklist per stage; leave a stage
-     empty if it doesn't apply. Each checklist item should be one commit. -->
-
-8 commits — 4 per milestone. Stage 4 folds into the commits it verifies
-(previews and tests ship with their code) and Stage 5 into commit 8; neither
-has standalone work in this phase.
+4 commits, all landed and each building green.
 
 ### Stage 1 — Data & Contracts
 
-- [x] `[M1.1] Set up the MVCS folder layout` — done in `b907584`; entry point and root view moved to `tao-24/App/`, `@main` struct renamed `Tao24Universe`. No build-setting change: `project.pbxproj` is the source of truth and keeps iOS 26.5 / Swift 5. Follow-ups `f528190` (swift-format config, 4-space) and `a9b6fd5` (capitalize struct) landed with it
-- [x] `[M1.1] Add tao-24Tests unit test target` — deferred on Sep 27, 2026, then un-deferred the same day and landed in `2989277` ahead of `DatabaseService`, whose claims are behavioural. Rooted at `tao-24Tests/` with a checked-in shared scheme. No `verify.sh` yet — `xcodebuild test` plus `swift-format lint --strict` cover it for now
-- [x] `[M1.1] Add DimensionDomain and the core design tokens` — deep-dark system, **dark-only** (app locks `.preferredColorScheme(.dark)`). `docs/design-tokens.json` is the spec; `ColorTokens`/`TypographyTokens`/`LayoutTokens` mirror it, cross-checked in CI-able form. Absorbs the Stage 3 component commit: `TaoCard`, `DomainPill`, `CompletionRing`, `GlowEffect`
-- [x] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — split as flagged, into three commits that each build: `8c6a9ce` (`HabitFrequency` + `Weekday`), `546f55d` (`Habit`, `HabitExecutionLog`, `LifeGoal` — mutually referential, so together), `9bb5b50` (`UserValueProfile` + onboarding enums)
-- [x] `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` — both `#Index` declarations, `SchemaV1`, and `HabitQuery`/`ExecutionLogQuery`/`LifeGoalQuery`/`UserValueProfileQuery` descriptor factories. `#Unique` on `[habitID, completedDayStart]` deliberately **not** added: its interaction with the existing unique `id` is upsert behaviour that cannot be verified without running the app. Revisit when a test target exists
+- [x] `[M2.1] Add HabitExecutionService for completion logging` — `a031228`.
+      Completion state, log, undo, toggle, and habit creation that enforces
+      the goal anchor. No streak API
 
 ### Stage 2 — Core Logic
 
-- [x] `[M1.2] Implement DatabaseService with migration plan and seeding` `[!]` — `58602c6`. Idempotent by construction (inserts only what is absent, so it self-repairs a partial seed), `nonisolated` in-memory factory, `isEphemeral` surfaced when the on-disk store fails. 13 tests against a live container
+- [x] `[M2.1] Add StarterHubController for the daily checklist` — `abd12df`.
+      Filter, quick-add draft, derived visible list and completion count
 
 ### Stage 3 — Integration
 
-- [x] ~~`[M1.1] Add CardContainer and DomainTagPill with previews`~~ — superseded: shipped as `TaoCard` and `DomainPill` in the design-tokens commit, alongside `CompletionRing` and `GlowEffect`. The pill still pairs colour with icon and label so colour is never the sole domain signal
-- [x] `[M1.2] Attach the ModelContainer and replace the template ContentView` — `1c8b12f`. `RootView` reads seeded goals through `@Query`; `ContentView` deleted. Followed by `07cde24`, which fixed a `textMuted` contrast failure the first real launch exposed and made the palette rule executable
+- [x] `[M2.1] Build the Starter Hub: daily checklist, rows, and quick-add` —
+      `c11c902`. `StarterHubView`, `HabitRowCard`, `QuickAddHabitSheet`, and
+      `RootView` switched over from the placeholder
 
 ### Stage 4 — Verification
 
-Folded into the commits above — previews ship with their components, tests with
-the service. No telemetry work, by product guarantee.
+- [x] `[M2.1] Add controlOutline so the completion ring is actually visible` —
+      `2c8c85f`. Found by running the screen, not by a test
 
 ### Stage 5 — Cleanup
 
-Folded into commit 8. No dead code or temporary scaffolding accumulates in a
-phase this short.
+Nothing accumulated. The temporary demo-seed used to screenshot the populated
+list was reverted before commit.
 
 ## Tooling
 
-<!-- Tool Building stage output. -->
-
-- **Test fakes & mocks:** `DatabaseService.makeContainer(inMemory: true)` is the
-  test seam — a real SwiftData stack, no disk, no UI host. `DatabaseServicing`
-  protocol exists for Phase 02 controllers; a fake is premature until one has a
-  consumer.
-- **Reproduction scripts:** `scripts/verify.sh` (build + test + lint), added in
-  commit 2. No bug to reproduce.
-- **Custom skills:** none. Revisit in Phase 02 — a feature-module scaffolder
-  would pay off across four hub milestones once the pattern is exercised.
-- **Background automations:** the `format-on-write` hook already covers Swift
-  formatting. No analytics or usage automation, by product guarantee.
+- Test fakes & mocks: none needed — `DatabaseService.makeContainer(inMemory:)`
+  gives every test a real, isolated store
+- Reproduction scripts: none
+- Custom skills: none
+- Background automations: none
 
 ## Status
 
-- Current stage: **Phase 01 complete** on branch `feat/m1-2-swiftdata-schema`,
-  pushed, not yet merged to `main`
-- Done: **Milestone 1.1**, all three Notion tasks — agentic setup, MVCS
-  folder layout (`b907584`, `f528190`, `a9b6fd5`, `90bab25`), design system
-  (`3d992ce`). Merged to `main` and pushed.
-- In progress: nothing — Phase 02 (Starter Hub) is next
-- Blocked on: nothing. `project.pbxproj` is the source of truth for build
-  settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
-  is available at that floor.
-- Verified: clean build, **29 tests passing**, and the app **launched in the
-  simulator** rendering its seeded goals. Prefix commands with
-  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`; no `sudo`
-  needed.
-- **Deployment target warning:** at 26.5 the app will not install on the iOS
-  26.4 simulator — one patch behind is already excluded, and installation
-  fails outright rather than degrading. Worth revisiting before TestFlight.
-  `project.pbxproj` remains the source of truth, so lowering it is a
-  deliberate decision, not a default.
-- Still unverified: no UI interaction is exercised. Tests cover value types
-  and the store; nothing taps a `CompletionRing` or scrolls a list.
-- Deferred to M3.3: the store's data protection level. `CLAUDE.md` requires
-  Complete File Protection, which makes the store unreadable while the device
-  is locked and so breaks WidgetKit timeline refresh. It is an entitlement, not
-  a schema change, so it costs the same to add in M3.3 as now — and M3.3 is
-  where the widget's actual needs are known. Phase 01 sets no data protection
-  entitlement.
-- Also raised: the roadmap's folder names (Core, Planner, Progress) disagree
-  with `CLAUDE.md`'s layout; plan follows `CLAUDE.md`. M1.2 Task 2's "default
-  templates" are seeded as three per-domain `LifeGoal`s plus the singleton
-  profile — blueprints stay a static code catalog, not rows.
-- Next step: merge to `main`, then Phase 02 Milestone 2.1 — the Starter Hub
+- Current stage: **Milestone 2.1 complete** on `feat/m2-1-starter-hub`
+- Done: Phase 01 in full, plus M2.1's three Notion tasks
+- In progress: nothing — M2.2 (Habit Planner) is next
+- Blocked on: nothing
+- Verified: 58 tests passing, clean build, and the hub **exercised in the
+  simulator** in both empty and populated states
+- Still unverified: no automated UI interaction. Nothing taps a ring or opens
+  the quick-add sheet in a test — the flows are covered at the controller
+  level, not through the view. A UI test target would close it.
+- Carried forward: the iOS 26.5 deployment target still refuses to install on
+  the 26.4 simulator; `#Unique` on `[habitID, completedDayStart]` is still
+  unadded, and now cheap to verify since a test target exists.
+- Next step: Milestone 2.2 — Habit Planner (dimension portals, blueprints,
+  micro-resources)
