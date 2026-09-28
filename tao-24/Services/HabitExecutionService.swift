@@ -28,12 +28,20 @@ final class HabitExecutionService {
     init() {}
 
     /// Whether this habit already has a completion recorded for the day.
+    ///
+    /// `calendar` decides where a day begins, and every method here threads
+    /// the same one through to the query and to the log it writes. Hard-coding
+    /// `.current` meant a caller computing analytics in another zone would
+    /// bucket the same log into a different day and silently see nothing.
     func isComplete(
         _ habit: Habit,
         on date: Date = Date(),
-        in context: ModelContext
+        in context: ModelContext,
+        calendar: Calendar = .current
     ) throws -> Bool {
-        try !context.fetch(ExecutionLogQuery.forHabit(habit.id, on: date)).isEmpty
+        try !context.fetch(
+            ExecutionLogQuery.forHabit(habit.id, on: date, calendar: calendar)
+        ).isEmpty
     }
 
     /// Records a completion unless the day already has one.
@@ -43,10 +51,15 @@ final class HabitExecutionService {
     func logCompletion(
         for habit: Habit,
         on date: Date = Date(),
-        in context: ModelContext
+        in context: ModelContext,
+        calendar: Calendar = .current
     ) throws -> Bool {
-        guard try !isComplete(habit, on: date, in: context) else { return false }
-        context.insert(HabitExecutionLog(habit: habit, completedAt: date))
+        guard try !isComplete(habit, on: date, in: context, calendar: calendar) else {
+            return false
+        }
+        context.insert(
+            HabitExecutionLog(habit: habit, completedAt: date, calendar: calendar)
+        )
         try context.save()
         return true
     }
@@ -61,9 +74,12 @@ final class HabitExecutionService {
     func removeCompletion(
         for habit: Habit,
         on date: Date = Date(),
-        in context: ModelContext
+        in context: ModelContext,
+        calendar: Calendar = .current
     ) throws -> Bool {
-        let existing = try context.fetch(ExecutionLogQuery.forHabit(habit.id, on: date))
+        let existing = try context.fetch(
+            ExecutionLogQuery.forHabit(habit.id, on: date, calendar: calendar)
+        )
         guard !existing.isEmpty else { return false }
         for log in existing {
             context.delete(log)
@@ -79,13 +95,14 @@ final class HabitExecutionService {
     func toggleCompletion(
         for habit: Habit,
         on date: Date = Date(),
-        in context: ModelContext
+        in context: ModelContext,
+        calendar: Calendar = .current
     ) throws -> Bool {
-        if try isComplete(habit, on: date, in: context) {
-            try removeCompletion(for: habit, on: date, in: context)
+        if try isComplete(habit, on: date, in: context, calendar: calendar) {
+            try removeCompletion(for: habit, on: date, in: context, calendar: calendar)
             return false
         }
-        try logCompletion(for: habit, on: date, in: context)
+        try logCompletion(for: habit, on: date, in: context, calendar: calendar)
         return true
     }
 
