@@ -18,7 +18,7 @@
 
 # Project Plan
 
-_Last updated: Sep 27, 2026 — M1.2 Task 1 (the four entities) done on branch._
+_Last updated: Sep 27, 2026 — entities, schema and indexes done; DatabaseService remains._
 
 ## Roadmap
 
@@ -183,7 +183,7 @@ has standalone work in this phase.
 - [ ] ~~`[M1.1] Add tao-24Tests unit test target and verify script`~~ — **deferred, not done.** Dropped from M1.1 by decision on Sep 27, 2026; the milestone was marked complete without it. Still rooted at `tao-24Tests/` when it lands, never under the synced `tao-24/` group. See Future tasks
 - [x] `[M1.1] Add DimensionDomain and the core design tokens` — deep-dark system, **dark-only** (app locks `.preferredColorScheme(.dark)`). `docs/design-tokens.json` is the spec; `ColorTokens`/`TypographyTokens`/`LayoutTokens` mirror it, cross-checked in CI-able form. Absorbs the Stage 3 component commit: `TaoCard`, `DomainPill`, `CompletionRing`, `GlowEffect`
 - [x] `[M1.2] Add the four @Model entities with typed frequency storage` `[!]` — split as flagged, into three commits that each build: `8c6a9ce` (`HabitFrequency` + `Weekday`), `546f55d` (`Habit`, `HabitExecutionLog`, `LifeGoal` — mutually referential, so together), `9bb5b50` (`UserValueProfile` + onboarding enums)
-- [ ] `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` — both `#Index` declarations plus the canonical descriptors, so no caller hand-rolls a scanning predicate
+- [x] `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` — both `#Index` declarations, `SchemaV1`, and `HabitQuery`/`ExecutionLogQuery`/`LifeGoalQuery`/`UserValueProfileQuery` descriptor factories. `#Unique` on `[habitID, completedDayStart]` deliberately **not** added: its interaction with the existing unique `id` is upsert behaviour that cannot be verified without running the app. Revisit when a test target exists
 
 ### Stage 2 — Core Logic
 
@@ -226,8 +226,8 @@ phase this short.
 - Done: **Milestone 1.1**, all three Notion tasks — agentic setup, MVCS
   folder layout (`b907584`, `f528190`, `a9b6fd5`, `90bab25`), design system
   (`3d992ce`). Merged to `main` and pushed.
-- In progress: nothing — next is the SchemaV1 / indexes commit, then M1.2
-  Task 2 (`DatabaseService`)
+- In progress: nothing — next is M1.2 Task 2 (`DatabaseService`), the last
+  commit in Phase 01
 - Blocked on: nothing. `project.pbxproj` is the source of truth for build
   settings (iOS 26.5 / Swift 5), so no build-setting work remains and `#Index`
   is available at that floor.
@@ -249,7 +249,6 @@ phase this short.
   with `CLAUDE.md`'s layout; plan follows `CLAUDE.md`. M1.2 Task 2's "default
   templates" are seeded as three per-domain `LifeGoal`s plus the singleton
   profile — blueprints stay a static code catalog, not rows.
-- Next step: `[M1.2] Add SchemaV1, compound indexes, and fetch descriptors` —
-  the entities now carry the `habitID` and `completedDayStart` columns the
-  compound index needs; `#Unique` on `[habitID, completedDayStart]` is worth
-  considering there to enforce one completion per habit per day at the store
+- Next step: `[M1.2] Implement DatabaseService with migration plan and
+  seeding` — builds the `ModelContainer` from `SchemaV1`, seeds three
+  per-domain `LifeGoal`s and the singleton `UserValueProfile` idempotently
